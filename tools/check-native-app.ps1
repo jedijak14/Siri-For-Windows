@@ -32,10 +32,13 @@ try {
   do {
    $condition=New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty,$title)
    $found=[System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children,$condition)
+   if(!$found) { $found=$root.FindFirst([System.Windows.Automation.TreeScope]::Descendants,$condition) }
    if($found) { return $found }
    Start-Sleep -Milliseconds 100
   } while ([DateTime]::UtcNow -lt $deadline)
-  throw "Window not found: $title"
+  $windows=[System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Children,[System.Windows.Automation.Condition]::TrueCondition)
+  $titles=@($windows | ForEach-Object {$_.Current.Name}) -join ' | '
+  throw "Window not found: $title. Desktop windows: $titles"
  }
  $bubbleLauncher=Start-Process (Join-Path $PSScriptRoot '../native-artifacts/Siri-for-Windows.exe') -ArgumentList '--bubble' -PassThru
  if (!$bubbleLauncher.WaitForExit(10000)) { $bubbleLauncher.Kill(); throw 'Bubble activation did not hand off.' }
