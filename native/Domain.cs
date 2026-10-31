@@ -76,6 +76,7 @@ public sealed record BillShare(string Name,long Items,long Tax,long Tip)
 }
 public static class Rules
 {
+ public static bool IsExcluded(Preferences settings,string app)=>settings.ExcludedApps.Any(x=>x.Equals(app,StringComparison.OrdinalIgnoreCase));
  public static bool WakeAllowed(string phrase,float confidence,DateTimeOffset now,DateTimeOffset last,bool enabled)=>enabled&&phrase.Trim().Equals("hey siri",StringComparison.OrdinalIgnoreCase)&&confidence>=.65f&&(now-last).TotalSeconds>=3;
  public static long Cents(decimal amount)
  {

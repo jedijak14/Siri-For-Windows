@@ -43,7 +43,7 @@ public sealed class LocalAi
  public async Task<(string Answer,string Model)> Ask(Preferences settings,string question,List<Turn> history,List<Source> sources,string? image,CancellationToken token,string instruction="")
  {
   if(question.Length>200_000)throw new ArgumentException("Shorten the request to under 200,000 characters.");
-  if(sources.Any(x=>settings.ExcludedApps.Contains(x.App)))throw new InvalidOperationException("An attached source is now excluded. Remove it before sending.");
+  if(sources.Any(x=>Rules.IsExcluded(settings,x.App)))throw new InvalidOperationException("An attached source is now excluded. Remove it before sending.");
   var models=await Models(token);if(models.Length==0)throw new InvalidOperationException("No local models are installed. Run ollama pull llama3.2:3b.");
   var model=image==null?settings.Model:settings.VisionModel;
   if(model.Length>0&&!models.Contains(model))throw new InvalidOperationException("The selected model is missing. Choose Automatic in Settings.");

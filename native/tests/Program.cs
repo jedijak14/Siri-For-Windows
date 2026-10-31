@@ -23,3 +23,4 @@ Check(Rules.Venmo("@friend",12.34m,"Dinner & tip").Host=="venmo.com","payment or
 Reject(()=>Rules.Venmo("https://evil.test",10,""),"invalid payment username");
 Reject(()=>Rules.Venmo("friend",-1,""),"negative payment");
 Console.WriteLine($"{checks} native domain checks passed. Microphone, accessibility, and real app interaction still require device testing.");
+Check(Rules.IsExcluded(new(){ExcludedApps=new(){"chrome"}},"Chrome"),"case-insensitive privacy exclusions");

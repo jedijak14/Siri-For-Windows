@@ -36,5 +36,5 @@ public sealed class SpeechService : IDisposable
  {
   var resume=Armed;StopWake();try{await Task.Run(()=>{if(settings.Voice.Length>0)Speaker.SelectVoice(settings.Voice);Speaker.Rate=Math.Clamp(settings.SpeechRate,-5,5);Speaker.Speak(text.Length>20000?text[..20000]:text);});}finally{if(resume&&!disposed)StartWake();}
  }
- public void Dispose(){disposed=true;StopWake();speaker?.SpeakAsyncCancel();speaker?.Dispose();}
+ public void Dispose(){disposed=true;StopWake();speaker?.SpeakAsyncCancelAll();speaker?.Dispose();}
 }
