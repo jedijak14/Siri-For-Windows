@@ -30,7 +30,7 @@ public partial class MainWindow : Window
  [System.Runtime.InteropServices.DllImport("user32.dll")]private static extern bool UnregisterHotKey(nint handle,int id);
  public MainWindow()
  {
-  InitializeComponent();RefreshHistory();Speech.StateChanged+=()=>Dispatcher.BeginInvoke(new Action(UpdateWake));Speech.Woke+=()=>Dispatcher.BeginInvoke(new Action(()=>{if(!Speech.Armed)return;Show();WindowState=WindowState.Normal;Activate();Prompt.Focus();Status.Text="Listening phrase detected. Type a request, or click dictation.";}));Speech.Failed+=error=>Dispatcher.BeginInvoke(new Action(()=>{Speech.StopWake();UpdateWake();Status.Text="Voice activation stopped: "+error;}));
+  InitializeComponent();RefreshHistory();Speech.StateChanged+=()=>Dispatcher.BeginInvoke(new Action(UpdateWake));Speech.Woke+=()=>Dispatcher.BeginInvoke(new Action(()=>{if(Speech.Armed)ShowBubble(true);}));Speech.Failed+=error=>Dispatcher.BeginInvoke(new Action(()=>{Speech.StopWake();UpdateWake();Status.Text="Voice activation stopped: "+error;}));
   Loaded+=async(_,_)=>{if(Store.LoadError!=null)MessageBox.Show(this,Store.LoadError,"Saved data");await RefreshModels();};
   SourceInitialized+=(_,_)=>{hwndSource=HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);hwndSource?.AddHook(WindowMessage);};
   Closed+=(_,_)=>{request?.Cancel();reminders.Stop();Speech.Dispose();if(hwndSource!=null){UnregisterHotKey(hwndSource.Handle,HotkeyId);hwndSource.RemoveHook(WindowMessage);}try{Store.Save();}catch{}};
@@ -40,6 +40,8 @@ public partial class MainWindow : Window
  internal bool SetWritingShortcut(bool enabled){if(hwndSource==null)return false;UnregisterHotKey(hwndSource.Handle,HotkeyId);var result=!enabled||RegisterHotKey(hwndSource.Handle,HotkeyId,0x4000|0x0002|0x0004,0x20);ShortcutEnabled=enabled&&result;return result;}
  private void CheckReminders(){foreach(var entry in Store.Data.Reminders.Where(x=>!x.Done&&x.Due<=DateTimeOffset.Now)){var key=entry.Id+entry.Due;if(reminded.Add(key))Status.Text="Reminder due: "+entry.Title+" · Open Tools → Reminders.";}}
  internal async Task RefreshModels(){try{var models=await Ai.Models();ModelStatus.Text=models.Length==0?"Install a local Ollama model":"Local model ready · "+(Store.Data.Settings.Model.Length>0?Store.Data.Settings.Model:models[0]);}catch{ModelStatus.Text="Local AI not connected · Start Ollama";}}
+ private WakeBubble? bubble;
+ internal void ShowBubble(bool dictate){if(bubble==null){bubble=new WakeBubble(this);bubble.Closed+=(_,_)=>bubble=null; bubble.Show();}else{bubble.Show();bubble.WindowState=WindowState.Normal;}bubble.Activate();if(dictate)_=bubble.Dictate();}
  internal bool ShortcutEnabled {get;private set;}
  internal void RefreshConversationList(){NewChat(this,new RoutedEventArgs());RefreshHistory();}
  internal void UpdateWake()=>WakeStatus.Text=Speech.Armed?"●  Hey Siri is listening":Speech.Requested?"◌  Hey Siri paused for speech":"○  Hey Siri is off";
@@ -74,6 +76,7 @@ public partial class MainWindow : Window
   var picker=new OpenFileDialog{Filter="Images and text exports|*.png;*.jpg;*.jpeg;*.webp;*.txt;*.md;*.csv;*.eml;*.json;*.log;*.ics;*.html",Multiselect=true};if(picker.ShowDialog(this)!=true)return;try{foreach(var file in picker.FileNames){var info=new FileInfo(file);if(info.Length>8*1024*1024)throw new InvalidOperationException("Each attachment must be under 8 MB.");if(new[]{".png",".jpg",".jpeg",".webp"}.Contains(info.Extension.ToLowerInvariant())){if(image!=null)throw new InvalidOperationException("Use one image per native request.");image=Convert.ToBase64String(File.ReadAllBytes(file));}else AddSources(new[]{new Source{Title=info.Name,Text=File.ReadAllText(file)}});}RenderAttachments();}catch(Exception error){MessageBox.Show(this,error.Message,"Attachment");}
  }
  private void SettingsClick(object sender,RoutedEventArgs e)=>Tools.Settings(this);
+ private void ModelsClick(object sender,RoutedEventArgs e)=>Tools.Models(this);
  private void OpenTools(object sender,RoutedEventArgs e)
  {
   var menu=new ContextMenu();void Add(string title,Action action){var item=new MenuItem{Header=title};item.Click+=(_,_)=>{try{action();}catch(Exception error){MessageBox.Show(this,error.Message,title);}};menu.Items.Add(item);}

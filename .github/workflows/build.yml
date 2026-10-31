@@ -8,6 +8,8 @@ permissions:
   contents: read
 jobs:
   windows:
+    permissions:
+      contents: write
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +50,14 @@ jobs:
           name: Siri-for-Windows-Native-exe
           path: native-artifacts/*.exe
           if-no-files-found: error
+      - name: Publish direct EXE download
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "native-v3.1-build${{ github.run_number }}"
+          gh release create $tag native-artifacts/Siri-for-Windows.exe --repo "${{ github.repository }}" --target "${{ github.sha }}" --title "Siri for Windows 3.1 — native Windows EXE" --notes "Download Siri-for-Windows.exe directly below. Native WPF, not Electron. Rounded windows, explicit local model selection, Hey Siri bubble, and opt-in Windows Settings Apps integration. Requires local Ollama for AI; voice requires English Windows speech recognition and explicit microphone opt-in. Unsigned community software. No custom Windows Settings navigation page or closed-app wake service." --latest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   android:
     runs-on: ubuntu-24.04
     steps:
