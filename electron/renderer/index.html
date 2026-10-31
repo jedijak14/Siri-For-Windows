@@ -34,8 +34,8 @@
 
       <main class="main-panel">
         <header class="topbar">
-          <div class="topbar-title">Siri <span class="local-pill"><i></i> ON DEVICE</span></div>
-          <div class="topbar-actions">
+          <div class="topbar-title"><button id="backButton" class="icon-button" aria-label="Back to conversations" hidden>‹</button>Siri <span class="local-pill"><i></i> ON DEVICE</span></div>
+          <div class="topbar-actions"><button id="quickMenuButton" class="icon-button" aria-label="Open Siri menu">☰</button>
             <button id="writingButton" class="button subtle" title="Use text you copied in another app">Writing assist</button>
             <button id="settingsTopButton" class="icon-button" aria-label="Open settings" title="Settings">⚙</button>
           </div>
@@ -47,7 +47,7 @@
             <h1>What can I help you with?</h1>
             <p class="hero-caption">Ask a question, or pick up where you left off.</p>
           </div>
-          <div id="recentCards" class="recent-cards"></div>
+          <input id="recentSearch" class="recent-search" type="search" aria-label="Search conversations" placeholder="Search conversations"><div id="recentCards" class="recent-cards"></div>
           <div class="suggestions">
             <button class="suggestion" data-mode="visual" data-prompt="Help me understand the page I share."><span class="suggestion-icon">◉</span><span><b>Ask about this page</b><small>Chrome or Edge. No extension.</small></span><span class="suggestion-arrow">↗</span></button>
             <button class="suggestion" data-mode="search" data-prompt="Find a message about…"><span class="suggestion-icon">⌕</span><span><b>Find something</b><small>Mail, history, and selected files</small></span><span class="suggestion-arrow">↗</span></button>
@@ -104,6 +104,7 @@
       </main>
     </div>
 
+    <dialog id="quickMenu" class="quick-menu"><header><h2>Siri</h2><button id="closeQuickMenu" class="icon-button" aria-label="Close menu">×</button></header><button id="menuHome">Conversations</button><button id="menuNew">New conversation</button><button data-quick="diet">Nutrition journal</button><button data-quick="receipt">Split a bill</button><button data-quick="visual">Visual intelligence</button><button id="menuWriting">Writing Tools ↗</button><button id="menuSettings">Settings &amp; privacy</button></dialog>
     <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,.txt,.md,.csv,.eml,.json,.log" multiple hidden>
     <div id="toast" class="toast" role="status"></div>
 

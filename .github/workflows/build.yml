@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: ['arena/0c07e6cf-siri-for-windows']
+    paths-ignore: ['README.md', 'docs/**']
 permissions:
   contents: read
 jobs:
