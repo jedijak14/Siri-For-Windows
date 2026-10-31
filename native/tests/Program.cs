@@ -22,5 +22,11 @@ Reject(()=>Rules.ValidateEntry(new(){Title="Title",Body=new string('x',100001)})
 Check(Rules.Venmo("@friend",12.34m,"Dinner & tip").Host=="venmo.com","payment origin");
 Reject(()=>Rules.Venmo("https://evil.test",10,""),"invalid payment username");
 Reject(()=>Rules.Venmo("friend",-1,""),"negative payment");
-Console.WriteLine($"{checks} native domain checks passed. Microphone, accessibility, and real app interaction still require device testing.");
 Check(Rules.IsExcluded(new(){ExcludedApps=new(){"chrome"}},"Chrome"),"case-insensitive privacy exclusions");
+
+new TaskPlan{Steps=new(){new(){Action="searchInbox",Query="trip"},new(){Action="summarize"},new(){Action="saveNote"}}}.Validate();checks++;
+Reject(()=>new TaskPlan{Steps=new(){new(){Action="shell"}}}.Validate(),"no shell actions");
+Reject(()=>new TaskPlan{Steps=new(){new(){Action="payment"}}}.Validate(),"no payment execution");
+Reject(()=>new TaskPlan{Steps=new(){new(){Action="searchHistory",Query="trip",Browser="Chrome",Profile="../../private"}}}.Validate(),"no arbitrary profile traversal");
+Reject(()=>new TaskPlan{Steps=Enumerable.Range(0,7).Select(_=>new TaskStep{Action="saveNote"}).ToList()}.Validate(),"bounded task length");
+Console.WriteLine($"{checks} native domain checks passed. Microphone, accessibility, and real app interaction still require device testing.");

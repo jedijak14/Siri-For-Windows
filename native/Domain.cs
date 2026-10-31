@@ -102,3 +102,21 @@ public static class Rules
   return new Uri("https://venmo.com/?txn=pay&recipients="+Uri.EscapeDataString(recipient.TrimStart('@'))+"&amount="+amount.ToString("F2",System.Globalization.CultureInfo.InvariantCulture)+"&note="+Uri.EscapeDataString(note.Length>180?note[..180]:note));
  }
 }
+public sealed class TaskStep
+{
+ public string Action {get;set;}="";
+ public string Query {get;set;}="";
+ public string Browser {get;set;}="";
+ public string Profile {get;set;}="Default";
+ public string Instruction {get;set;}="Summarize the approved context.";
+ public string App {get;set;}="";
+}
+public sealed class TaskPlan
+{
+ public List<TaskStep> Steps {get;set;}=new();
+ public void Validate()
+ {
+  if(Steps==null||Steps.Count<1||Steps.Count>6)throw new ArgumentException("A plan must have 1–6 supported steps.");
+  foreach(var step in Steps){if(step==null||!new[]{"searchInbox","searchHistory","summarize","saveNote","openApp"}.Contains(step.Action))throw new ArgumentException("Unsupported action. No steps were executed.");if(step.Action.StartsWith("search")&&(string.IsNullOrWhiteSpace(step.Query)||step.Query.Length>200))throw new ArgumentException("Search terms must contain 1–200 characters.");if(step.Action=="searchHistory"&&(!new[]{"Chrome","Edge"}.Contains(step.Browser)||!System.Text.RegularExpressions.Regex.IsMatch(step.Profile,"\\A(Default|Profile [0-9]+)\\z")))throw new ArgumentException("Invalid browser or profile.");if(step.Action=="summarize"&&(step.Instruction==null||step.Instruction.Length>1000))throw new ArgumentException("Invalid summary instruction.");if(step.Action=="openApp"&&!new[]{"photos","explorer","settings"}.Contains(step.App))throw new ArgumentException("This app is not in the allowed action list.");}
+ }
+}
