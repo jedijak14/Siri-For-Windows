@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#090a0d">
     <title>Siri for Windows</title>
-    <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="reference.css"><link rel="stylesheet" href="features.css">
+    <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="reference.css"><link rel="stylesheet" href="features.css"><link rel="stylesheet" href="native-preview.css">
   </head>
   <body>
     <div class="app-shell">
@@ -35,7 +35,7 @@
       <main class="main-panel">
         <header class="topbar">
           <div class="topbar-title"><button id="backButton" class="icon-button" aria-label="Back to conversations" hidden>‹</button>Siri <span class="local-pill"><i></i> ON DEVICE</span></div>
-          <div class="topbar-actions"><button id="quickMenuButton" class="icon-button" aria-label="Open Siri menu">☰</button>
+          <div class="topbar-actions"><button id="quickMenuButton" class="icon-button" aria-label="Open Siri menu">Tools ⋯</button>
             <button id="writingButton" class="button subtle" title="Use text you copied in another app">Writing assist</button>
             <button id="settingsTopButton" class="icon-button" aria-label="Open settings" title="Settings">⚙</button>
           </div>
@@ -104,7 +104,7 @@
       </main>
     </div>
 
-    <dialog id="quickMenu" class="quick-menu"><header><h2>Siri</h2><button id="closeQuickMenu" class="icon-button" aria-label="Close menu">×</button></header><button id="menuHome">Conversations</button><button id="menuNew">New conversation</button><button data-quick="notes">Notes</button><button data-quick="answers">Saved answers</button><button data-quick="reminders">Reminders</button><button data-quick="models">Local models</button><button data-quick="diet">Nutrition journal</button><button data-quick="receipt">Split a bill</button><button data-quick="visual">Visual intelligence</button><button id="menuWriting">Writing Tools ↗</button><button id="menuSettings">Settings &amp; privacy</button></dialog>
+    <dialog id="quickMenu" class="quick-menu"><header><h2>Siri</h2><button id="closeQuickMenu" class="icon-button" aria-label="Close menu">×</button></header><button id="menuHome">Conversations</button><button id="menuNew">New conversation</button><button data-quick="search">Device search</button><button data-quick="tasks">Cross-app tasks (legacy)</button><button data-quick="windows">Windows shortcuts</button><button data-quick="notes">Notes</button><button data-quick="answers">Saved answers</button><button data-quick="reminders">Reminders</button><button data-quick="models">Local models</button><button data-quick="diet">Nutrition journal</button><button data-quick="receipt">Split a bill</button><button data-quick="visual">Visual intelligence</button><button id="menuWriting">Writing Tools ↗</button><button id="menuSettings">Settings &amp; privacy</button></dialog>
     <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,.txt,.md,.csv,.eml,.json,.log" multiple hidden>
     <div id="toast" class="toast" role="status"></div>
 

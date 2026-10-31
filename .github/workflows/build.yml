@@ -26,12 +26,23 @@ jobs:
       - name: Native domain checks
         run: dotnet run --project native/tests/NativeChecks.csproj --configuration Release
       - name: Publish self-contained native Windows executable
-        run: dotnet publish native/SiriNative.csproj --configuration Release --runtime win-x64 --self-contained true --output native-artifacts
+        shell: pwsh
+        run: |
+          dotnet publish native/SiriNative.csproj --configuration Release --runtime win-x64 --self-contained true --output native-artifacts *> native-build.log
+          $code = $LASTEXITCODE
+          Get-Content native-build.log
+          if ($code -ne 0) {
+            Get-Content native-build.log | Where-Object { $_ -match ': error ' } | ForEach-Object { Write-Output "::error::$_" }
+            exit $code
+          }
       - name: Verify single-file package
         shell: pwsh
         run: |
           if (!(Test-Path native-artifacts/Siri-for-Windows.exe)) { throw 'Missing native EXE' }
           if (Get-ChildItem native-artifacts -Filter *.dll) { throw 'Expected bundled libraries, found external DLLs' }
+      - name: Launch native UI with voice activation off
+        shell: powershell
+        run: ./tools/check-native-app.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: Siri-for-Windows-Native-exe

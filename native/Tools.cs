@@ -15,7 +15,7 @@ namespace SiriNative;
 internal class ToolWindow : Window
 {
  public StackPanel Body {get;}=new(){Margin=new Thickness(24)};
- public ToolWindow(Window owner,string title,int width=680,int height=590){Owner=owner;Title=title;Width=width;Height=height;MinWidth=420;MinHeight=350;WindowStartupLocation=WindowStartupLocation.CenterOwner;Content=new ScrollViewer{Content=Body,VerticalScrollBarVisibility=ScrollBarVisibility.Auto};}
+ public ToolWindow(Window owner,string title,int width=680,int height=590){Owner=owner;Style=(Style)Application.Current.FindResource(typeof(Window));Title=title;Width=width;Height=height;MinWidth=420;MinHeight=350;WindowStartupLocation=WindowStartupLocation.CenterOwner;Content=new ScrollViewer{Content=Body,VerticalScrollBarVisibility=ScrollBarVisibility.Auto};}
 }
 internal static class Ui
 {
