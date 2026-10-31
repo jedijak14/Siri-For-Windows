@@ -29,4 +29,5 @@ Reject(()=>new TaskPlan{Steps=new(){new(){Action="shell"}}}.Validate(),"no shell
 Reject(()=>new TaskPlan{Steps=new(){new(){Action="payment"}}}.Validate(),"no payment execution");
 Reject(()=>new TaskPlan{Steps=new(){new(){Action="searchHistory",Query="trip",Browser="Chrome",Profile="../../private"}}}.Validate(),"no arbitrary profile traversal");
 Reject(()=>new TaskPlan{Steps=Enumerable.Range(0,7).Select(_=>new TaskStep{Action="saveNote"}).ToList()}.Validate(),"bounded task length");
+Check(Rules.AllowedHistory(new(){ExcludedApps=new(){"outlook"}},new[]{new Turn{Sources=new(){new(){App="Outlook"}}},new Turn{Answer="plain"}}).Count()==1,"excluded sources are removed from follow-up context");
 Console.WriteLine($"{checks} native domain checks passed. Microphone, accessibility, and real app interaction still require device testing.");
