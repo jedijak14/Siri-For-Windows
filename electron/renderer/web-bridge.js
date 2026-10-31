@@ -8,6 +8,7 @@ if (!window.siri) {
   window.siri={
     openWriting:async()=>{const panel=window.open('writing.html','siri-writing-tools','width=490,height=640');if(!panel)throw Error('Allow a popup to open the separate Writing Tools panel.');},
     writingContext:async()=>null,
+    runWorkflow:nativeOnly,
     readBrowser:nativeOnly,searchInbox:nativeOnly,searchBrowserHistory:nativeOnly,replaceSelection:nativeOnly,
     listMeals:async()=>read('siri-meals',[]),
     saveMeal:async value=>{const meal={...value,id:value.id||crypto.randomUUID(),date:value.date||new Date().toISOString()};const entries=read('siri-meals',[]).filter(x=>x.id!==meal.id);entries.push(meal);localStorage.setItem('siri-meals',JSON.stringify(entries.slice(-1000)));return meal;},

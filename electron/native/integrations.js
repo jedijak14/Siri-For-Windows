@@ -29,3 +29,17 @@ async function readBrowserHistory(browser,profile,query){
  }finally{db?.close();await fs.rm(tmp,{recursive:true,force:true});}
 }
 module.exports={appName,validateMeal,paymentUrl,readBrowserHistory};
+
+function validatePlan(value){
+ if(!value||!Array.isArray(value.steps)||value.steps.length<1||value.steps.length>6)throw Error('A task must contain 1–6 supported steps.');
+ return {steps:value.steps.map(step=>{
+  if(!step||!['searchInbox','searchHistory','summarize','saveNote','openApp'].includes(step.action))throw Error('The plan contains an unsupported action. Nothing has been executed.');
+  const result={action:step.action};
+  if(['searchInbox','searchHistory'].includes(step.action)){if(typeof step.query!=='string'||!step.query.trim()||step.query.length>200)throw Error('Search steps require 1–200 query characters.');result.query=step.query.trim();}
+  if(step.action==='searchHistory'){if(!['Chrome','Edge'].includes(step.browser)||!/^Default$|^Profile \d+$/.test(step.profile||''))throw Error('Choose a supported browser profile.');result.browser=step.browser;result.profile=step.profile;}
+  if(step.action==='summarize'){result.instruction=String(step.instruction||'Summarize the preceding results.').slice(0,1000);}
+  if(step.action==='openApp'){if(!['photos','explorer','settings'].includes(step.app))throw Error('The requested app is not in the safe action list.');result.app=step.app;}
+  return result;
+ })};
+}
+module.exports.validatePlan=validatePlan;

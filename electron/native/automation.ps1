@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+[Console]::InputEncoding = New-Object System.Text.UTF8Encoding($false)
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $payload = [Console]::In.ReadToEnd() | ConvertFrom-Json
 Add-Type -AssemblyName UIAutomationClient

@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("siri", Object.freeze({
+  runWorkflow: (plan) => ipcRenderer.invoke("workflow:run",plan),
   openWriting: () => ipcRenderer.invoke("writing:open"),
   writingContext: () => ipcRenderer.invoke("writing:context"),
   replaceSelection: (text) => ipcRenderer.invoke("writing:replace",text),
