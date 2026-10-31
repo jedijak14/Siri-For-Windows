@@ -1,0 +1,23 @@
+{
+  "builtCommit": "0c94c796bd70a207c7deeb6a8780fc1eb0cb2752",
+  "run": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41232146663",
+  "status": "success",
+  "artifacts": [
+    {
+      "name": "Siri-for-Windows-exe",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41232146663/artifacts/13053863953",
+      "archiveBytes": 110521097,
+      "archiveSha256": "bfa1aaadba7fa164a2ab1d37b49177fc8aec4e08c4c8f42a5a8fcb9f3e28153b",
+      "description": "ZIP containing the real unsigned x64 Electron portable executable. Requires local Ollama and an installed model."
+    },
+    {
+      "name": "Siri-Android-debug-apk",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41232146663/artifacts/13054440385",
+      "archiveBytes": 75768,
+      "archiveSha256": "1adc56f36db3eb7def864d0b5126ea210e6e73060d4279c5fb1e68fb38d0739b",
+      "description": "ZIP containing an installable Android debug companion APK. Requires a user-trusted HTTPS Siri server; not standalone on-device AI."
+    }
+  ],
+  "localDownload": "Blocked by sandbox networking at GitHub artifact blob-storage redirect; binaries are hosted in GitHub Actions, not in the local repository folder.",
+  "validation": "19 automated tests, Windows PowerShell syntax and native C# compilation, successful EXE/APK packaging, and desktop/mobile Chromium smoke checks. No interactive Windows/Office or Android device testing."
+}
