@@ -1,105 +1,87 @@
-# Siri for Windows
+# Siri for Windows — native Windows edition
 
-An independent local-first Windows assistant, built from the supplied Electron/Python app and styled using the supplied references and logo. Not affiliated with Apple or Microsoft; this is not an official Apple Siri client.
+The primary Windows app is now a **native C# / WPF executable**, not Electron, Chromium, a WebView, Python, or a browser window. It is published as one self-contained x64 `.exe`, with the .NET runtime bundled. No Node.js, Electron or separately installed .NET runtime is needed to run it. Some bundled native libraries are extracted to the normal .NET single-file cache at launch; it is not an installer or a web shell.
 
-## Run
+This is an independent community project, not an official Apple or Microsoft product. Local AI still requires a running **Ollama** installation and an installed model; model weights are not bundled into the executable.
+
+## A quieter desktop app
+
+The native window follows the supplied reference's structure: a blue conversation sidebar, a dark main conversation area, a quiet empty state, and a bottom composer. The sidebar contains conversations—not a long feature list. Secondary actions live in **one Tools menu**. Writing assistance opens in a **separate native window**.
+
+The browser preview was simplified too, but it is a companion/legacy web interface, not the implementation packaged into the primary Windows EXE.
+
+## “Hey Siri”
+
+1. Run the native app and open **Settings & privacy**.
+2. Enable **Listen for ‘Hey Siri’ while this app is running**, then confirm microphone use and Save.
+3. Keep the app running, including minimized to the taskbar, and say **Hey Siri**.
+
+The Windows `System.Speech` engine recognizes that exact English phrase locally and asks the UI to restore/activate. A confidence threshold and cooldown reduce accidental triggers. The visible status changes to **Hey Siri is listening**. The microphone is not recorded to a file or sent to Ollama/cloud services by this wake-word listener.
+
+**Voice activation is off at every launch.** Turning it off or closing the app disposes the recognizer. It does not install a background service, startup entry, or OS-wide assistant replacement, and cannot respond after the app exits. An installed **English Windows speech recognizer**, working microphone, and Windows desktop-microphone permission are required. Accuracy, background noise, hardware and enterprise policy need real-device testing. Automated CI does not verify actual spoken audio. The wake phrase opens the app; following commands are typed or captured through the explicit one-shot dictation button, not silently recorded after every wake.
+
+A second launch activates the running instance instead of starting a second microphone listener or competing data writer.
+
+## Features implemented directly in the native EXE
+
+- Local chat through Ollama's HTTP API, installed text/vision model choices, language preferences, per-conversation follow-ups, optional saved conversations and searchable history.
+- Expand/collapse replies, selectable text, copy selected text/all, an answer detail window, saved answers, notes, and explicit source excerpts. Model output is plain selectable text, not executable markup. Images/text exports attach through a native file picker.
+- Windows voice selection and speaking pace, reply read-aloud, and explicit one-shot English dictation. Wake recognition is paused during dictation/read-aloud to avoid competing listeners or self-triggering.
+- Separate Writing Tools: drafts, proofreading, tone/length changes, formulas and slide outlines. Opt-in **Ctrl+Shift+Space** reads the active app's selected text using Windows UI Automation. Replacements require confirmation and verification of the original process, foreground window, non-password field and unchanged selection. Unsupported fields use manual copy/paste. Excel evaluates inserted formulas; review external references carefully.
+- Chrome/Edge page text via **Windows UI Automation**, with a native window picker and permission prompt. **No extension or debugging port is needed.** Inaccessible pages use a user-approved screenshot instead; this is not continuous background screen awareness.
+- Classic Outlook inbox search through the running Outlook COM object, capped at 500 recent default-inbox items / 12 matching excerpts. Requires approval. New Outlook and other mailbox APIs are not supported. No email is sent, deleted or changed.
+- Chrome/Edge history through a temporary SQLite snapshot of the selected Default/Profile N store, with parameterized queries and cleanup. No incognito access; locks can require closing the browser.
+- User-selected folder text search, skipping reparse/symlink directories, bounded traversal/read volume and excerpt results. This is keyword search, not embedding-based device-wide indexing.
+- One-time primary-display screenshots, with explicit consent and an image review before attachment. Screenshots can contain excluded/private app content; review before sending.
+- Local notes, saved answers and reminders with search, pin, edit, delete, explicit context attachment and text export. Reminders are best-effort status alerts while the app is running, not OS background alarms.
+- A reviewed nutrition journal with editable foods/macros. Structured meal JSON can be opened from a reply for review; estimates are not medical advice and are never auto-saved to a health account.
+- Native itemized bill splitting using decimal/integer-cent arithmetic and proportional tax/pre-tax tip allocation. A Venmo link is a reviewed external handoff, **not payment execution or verification**. Apple Cash is not integrated.
+- Reviewed cross-app tasks: a locally generated, validated plan can search approved Outlook/history, summarize results, save a text note to a user-selected destination and open Photos/Explorer/Settings. At most six allowlisted steps. It rejects scripts, arbitrary commands/paths, sending/deletion and payments, and stops on the first failure. Completed steps are not rolled back.
+
+All of these native implementations are under `native/`; they do not call the Electron app, a PowerShell bridge, a Node process or a hosted UI. Windows Camera can be opened from Tools, but native in-app live camera capture is not yet implemented—take a photo in Camera, then attach it.
+
+## Privacy and saved data
+
+Native state is plaintext JSON under `%LOCALAPPDATA%\SiriForWindowsNative\state.json`. Notes, answers, reminders and meals persist independently of chat Memory. Conversation persistence defaults off. Each saved library is capped at 1,000 entries; conversations retain at most 250 turns and the most recent 200 conversations are persisted. Writes replace a temporary file atomically. Unreadable data is not silently overwritten.
+
+App exclusions are checked case-insensitively before direct reads and before using shared sources; prior turns from newly excluded sources are omitted from follow-up AI context. Exclusions are not a system-wide DLP policy: pasted text, old deliberately saved notes, exported files and screenshots can contain excluded content. Review what you share. Current native folder search is explicit selection, not a folder-exclusion policy or background index.
+
+The native store is **separate** from legacy Electron/browser stores. This version does not automatically migrate or synchronize old conversations, tags or libraries. Advanced legacy features such as word-level writing diffs, tags, Markdown previews and the command palette are not all ported to the native UI yet. Do not equate a native rewrite with universal application compatibility.
+
+## Build and run from source
+
+On Windows with the .NET 8 SDK and package-network access:
+
+```powershell
+dotnet run --project native/SiriNative.csproj
+dotnet run --project native/tests/NativeChecks.csproj -c Release
+dotnet publish native/SiriNative.csproj -c Release -r win-x64 --self-contained true -o native-artifacts
+```
+
+The result is `native-artifacts/Siri-for-Windows.exe`. It is unsigned. SmartScreen may warn about unsigned community software; signing is not configured. The primary workflow's artifact is named **Siri-for-Windows-Native-exe**. Older artifacts named `Siri-for-Windows-exe` contain the old Electron build; do not confuse them.
+
+The GitHub Windows job checks native arithmetic/wake/validation rules, publishes the self-contained EXE, verifies there are no required loose DLLs, launches the actual WPF app, finds its composer through accessibility, checks that wake recognition is visibly off, and tests second-instance activation. It never enables the runner's microphone. Real Windows/Office/Outlook/hardware behavior needs device testing.
+
+## Android and legacy/browser edition
+
+The Android APK is still the separately built **HTTPS-server-backed companion**, not a .NET app or on-device model. Its server must host the companion web UI; the native WPF EXE does not expose a companion HTTP server. Android image/file picking and origin-gated camera permission remain available. Windows app control and screen sharing are not implemented on Android.
+
+The prior Electron/web edition is retained for compatibility and the browser preview:
 
 ```sh
 npm ci
-npm start       # Windows Electron app
-npm run dev     # browser preview at 0.0.0.0:3000
-npm test
+npm run dev                     # browser companion preview
+npm start                       # legacy Electron, NOT the native app
+npm run build:electron:legacy    # explicitly optional legacy packaging
+npm run start:native             # .NET SDK required
+npm run build:win                # now publishes the native .NET EXE
+npm test                        # companion/domain tests
 ```
 
-Install and run Ollama on the same machine as the desktop app or preview server, and install a local model, e.g. `ollama pull llama3.2:3b`. Image tasks need an installed model that advertises vision support. No model is bundled. Offline errors are real errors, not simulated answers. Language instructions support English, French, Japanese, Korean, Portuguese and Spanish; output quality depends on your model.
+See [legacy documentation](docs/legacy-electron.md) for its Office add-in, optional extension and browser-specific setup. Universal Microsoft-app embedding, unrestricted autonomous control, stock Camera Siri mode, direct private voicemail/messaging attachment stores, photo batch sharing/editing, and actual payment execution remain unimplemented. The native EXE does not acquire these capabilities merely by being native.
 
-The preview uses relative `/api/…` routes, not the user's browser calling a sandbox localhost address. Camera/screen/clipboard need a secure context and permission. The preview server is development-only; production hosting requires authentication, rate limits, HTTPS, and deployment review.
+## Downloads / current build status
 
-## Interface
+Native code compiled and passed the actual WPF startup/voice-off check in run [41235505516](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41235505516). The final build including native task orchestration, context filtering and single-instance checks is being verified; final artifact links and SHA-256 values are recorded in `docs/build-artifacts.json` once it succeeds.
 
-- User-supplied orb logo, charcoal glass panels, rounded conversation history tiles populated from real chats, not fabricated screenshot content.
-- Selectable, safely rendered answers, expand/collapse, a detail view, selected-text copy, read-aloud, and disclosed source excerpts. No invented web citations or images.
-- Optional local memory and older-message keyword retrieval; current-session follow-ups also work with persistence off. Desktop uses JSON under Electron `userData`; preview uses localStorage. Memory defaults off. Disable stops persistence/retrieval; Delete removes saved memory; New chat clears the current view.
-- Windows voice selection, pace, volume and voice-dependent pitch expressivity through SSML. Dictation uses installed Windows speech components. Browser speech uses browser voices. This is not a custom neural voice engine.
-- One-shot screen/window, camera and image input. No continuous background capture. Up to three images, 8 MB each.
-
-## Writing Tools — separate from Siri
-
-Writing Tools opens in its **own always-on-top panel**, not an in-Siri studio. On Windows, enable **Ctrl+Shift+Space** in Settings, select text in Word, Excel, a browser or another app, then invoke the shortcut. Windows UI Automation reads only the selected text after checking the process against exclusions.
-
-Proofread, rewrite, change tone, compose drafts, generate Excel formulas or slide outlines. Review the result and explicitly confirm replacement. Before sending Ctrl+V, the native helper verifies the original process, window focus, password flag and unchanged selected text. Unsupported/changed selections are refused; use manual copy/paste. Your clipboard changes to the revision. Windows accessibility compatibility varies: this is **not a guarantee of embedding in every app**. Some apps require manual copy/paste or the Office add-in.
-
-The optional Office task pane supports Word, Excel and PowerPoint. Host `/office/taskpane.html` through trusted HTTPS, update `SourceLocation` in `office/manifest.xml`, and sideload using Microsoft's add-in development mechanism. The default localhost HTTPS URL is a placeholder: `npm run dev` by itself serves HTTP. It reads selections only on click and inserts only after confirmation. Excel insertion requires one cell; formula insertion has a separate explicit opt-in. Office.js loads from Microsoft's hosted SDK. Outlook/OneNote do not have an embedded add-in here. Real Office validation remains required.
-
-## Chrome and Edge — no extension required on Windows
-
-Use **Browser** in the composer or **Read Chrome or Edge** under Visual Intelligence. The app asks you to choose a visible eligible browser window and reads currently accessible page text using Windows UI Automation. No extension, debugging port or browser restart is needed. Pages that expose no accessible text require a user-approved screenshot instead. No attempt is made to read password fields. Browser app exclusions are enforced before the page read.
-
-Device search offers direct Chrome/Edge history search. Choose Default or Profile N and approve a temporary SQLite snapshot. Parameterized queries return up to 30 matching titles/URLs; temporary files are deleted. The live database is not modified; locked profiles can require closing the browser. Incognito history is not available.
-
-The old `browser-extension/` is retained as an optional Chromium companion, not a dependency of the native Windows path. To use it, load unpacked and permit its exact origin in Ollama's `OLLAMA_ORIGINS`; avoid wildcards. Extension website exclusions are independent from desktop preferences. Its Open in Siri action uses the packaged app's `siriwindows://answer` handler; long answers use copy/paste.
-
-## Inbox and device search
-
-**Classic Outlook** search uses the currently running Outlook COM object. Each request asks permission, then searches up to 500 recent default-inbox messages and returns at most 12 matching excerpts. New Outlook, cloud mailbox APIs, other folders, voicemail and messaging stores are not supported. Outlook security policy can block access. Messages are not sent/deleted/edited. Results are attached for review and sent to the local model only when you press Send.
-
-Folder search requires a folder selected through a native picker; supports text, markdown, exported email/CSV/JSON/log/calendar/HTML files, bounded traversal, exclusions and keyword ranking. This is not embedding-based semantic indexing. No arbitrary device-wide private-store indexing occurs.
-
-## Reviewed cross-app tasks
-
-**Cross-app tasks** asks the local model for a bounded plan, shows the proposed steps, then validates the plan again in the native process. A reviewed plan can search classic Outlook, search Chrome/Edge history, summarize approved results, save a text note using a native Save dialog, and open Photos/Explorer/Settings. Each private-data read asks permission. At most six steps; execution stops at the first failure and reports completed steps. Tasks run only while the app is open.
-
-This is scoped, user-approved orchestration, **not unrestricted autonomous control**. The runner rejects arbitrary commands, scripts, arbitrary write paths, email sending, deletion and payments. Saved notes are not automatically shared. Partially completed tasks are reported, not rolled back.
-
-## Meals and receipts
-
-- Meal vision prompts provide uncertain, non-medical estimates. A valid structured response `{name,items:[{name,calories,protein,carbs,fat}],uncertainty}` has a **Review & log meal** action. Otherwise enter the estimates manually.
-- The local nutrition journal lets you review foods and macros, updates totals immediately as values change, and supports save/edit/delete. Nothing is saved without a click. Desktop stores `nutrition.json`; preview uses localStorage. Independent from chat Memory; not connected to an external health account.
-- The receipt calculator splits a reviewed subtotal, tax and pre-tax tip with exact-cent remainder distribution. OCR/model extraction must be checked before entering amounts. Equal shares remain available; v2.1 adds a separate item-by-item assignment calculator.
-- Venmo integration validates a username and amount, asks confirmation and opens the official HTTPS payment handoff. You must authenticate and confirm in Venmo. Current client support for the URL parameters and payment status cannot be verified by Siri. **No payment is submitted or confirmed by this app.** Apple Cash has no supported Windows payment integration here.
-
-## Privacy and native compatibility
-
-`electron/native/automation.ps1` implements Windows Accessibility/Outlook operations. Native code runs only on a user action or opt-in shortcut; no startup persistence, browser automation debugging port, hidden capture or arbitrary model-generated commands. App exclusions are checked before native reads. They are not a system-wide DLP policy: manually pasted text or a screenshot can contain an excluded app, so review content before sharing. Office permissions and optional extension site exclusions are separate.
-
-Windows UI Automation, Outlook COM, native insertion and real Office interoperability cannot be fully validated in this Linux workspace. Security policies, app versions and accessibility support can change behavior. Universal app embedding, stock Camera “Siri Mode”, private voicemail/messaging attachment ingestion, photo batch editing/sharing, unrestricted autonomous cross-app actions, payment execution, and continuous real-time screen awareness are **not implemented**.
-
-## Android companion
-
-The native Android project uses the supplied logo and connects only after the user confirms a trusted HTTPS Siri server. No insecure JavaScript bridge, certificate bypass or HTTP allowance. The server's responsive interface provides the glass mobile chat/history design. Your phone cannot reach your PC using localhost. This APK is a **server-backed companion**, not bundled on-device AI; v2.1 adds user-selected image/text files and permission-gated camera access in the WebView. Android screen sharing and Windows app controls remain unsupported. Do not describe it as feature-parity with the Windows app.
-
-## Packaging and validation
-
-```sh
-npm run build:win             # portable Windows .exe
-npm run build:win:installer   # NSIS installer
-npm run build:android        # JDK 17, Android SDK 35, Gradle 8.9 required
-```
-
-Windows outputs go to `dist/`; Android debug APK to `android/app/build/outputs/apk/debug/app-debug.apk`. Windows binaries are unsigned; debug APKs use the Android development key. Release signing requires a separate process.
-
-`.github/workflows/build.yml` builds on Windows and Android-capable runners and uploads artifact archives. Both jobs completed successfully for commit `c1a6e97e14c52881498e8a1b80d923251dacd377` in [build run 41234038213](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213).
-
-- [Windows Electron portable EXE archive](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055136661)
-- [Android debug companion APK archive](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055145735)
-
-Download and extract the archives while signed into GitHub. Artifact URLs expire under the repository retention policy. Archive SHA-256 digests and sizes are recorded in `docs/build-artifacts.json`. The sandbox blocks GitHub's blob-storage download redirects, so these binaries are hosted on GitHub rather than copied into the local repository folder. Manual dispatch returned HTTP 403; push-triggered builds worked.
-
-Local validation: **34 passing tests** (pure functions, SQLite snapshot/query handling, plan validation and simulated-DOM interactions), JavaScript/XML syntax checks, no production npm advisories. These are not real native desktop/Office/Android device tests. PowerShell syntax, UI Automation assembly loading, and native C# helper compilation passed in the Windows workflow. Desktop/mobile Chromium smoke checks also passed: separate writing popup, honest offline errors, mobile menu/back navigation, no page errors or horizontal overflow. Legacy Python tests need Tkinter, absent here. Build-time transitive npm advisories remain; review before release.
-
-Local Windows packaging was retried and blocked fetching Electron by certificate/download-network restrictions. Local Android tooling is absent. GitHub runner builds produced actual EXE and APK artifacts; no TLS verification was disabled. Build outputs/caches are ignored and must not be committed. The original Python/Tkinter app remains available as an alternative legacy interface, not the new Electron renderer.
-
-
-## v2.1 — personal tools and reliability
-
-- **Notes:** local create/edit/delete, tags, pinning, all-term search, safe Markdown preview, Markdown export, and explicit attachment as AI context. Attachments use at most the first 40,000 characters. Notes are not automatically indexed or fed to a model.
-- **Saved answers:** Save on any reply, independently of Memory; pin, search, edit, read, export or attach later. Saves question, answer text and model name, not original binary attachments or a complete provenance archive.
-- **Reminders:** local date/time, completion, reopen and one-hour snooze. Due alerts are best-effort in-app toasts checked once per minute while the main app window is running; OS/browser suspension can delay them. No OS background alarm, email delivery, or alert while the app is closed. No recurring reminders yet.
-- **Itemized splitting:** name diners, assign individual/shared dishes, allocate tax and pre-tax tip proportionally. Integer-cent and BigInt allocation preserves every cent, with deterministic remainder handling. Unassigned dishes, duplicate names and invalid amounts are rejected. No payment is initiated by copying a split.
-- **Command palette:** Ctrl/Cmd+K, searchable actions, arrow-key navigation and Enter activation; mobile still has the Siri menu.
-- **Model controls:** choose installed text/image models, refresh discovery and copy an installation command. No automatic downloads. Missing selections and incompatible image models produce explicit errors rather than silent model substitution.
-- **Stop generation:** cancels in-flight local inference/model discovery, keeps the draft and attachments and does not display cancellation as a model connection failure. Requests are scoped by renderer and ID; cancellation of a completed request does not undo already completed work.
-- **Writing comparison:** the separate Writing Tools panel can compare a revision to the exact draft sent to the model, with inserted/deleted text and character counts. Large comparisons use complete before/after blocks to bound work. This is review assistance, not individual change acceptance or document undo.
-- **Android uploads/camera:** native document picker returns up to three explicitly chosen content-provider files. The camera permission is granted only to the confirmed HTTPS server origin and only for video capture; microphone requests are denied. The WebView has no JavaScript-to-native bridge or TLS bypass. Camera output is still submitted to the configured server only when the user sends a request. Real-device camera/file chooser testing remains necessary.
-
-The native notes/answers/reminders store is a serialized, atomically replaced `library.json` in Electron userData. Each collection is capped at 1,000 entries; note/answer text at 100,000 characters. Validation is shared with the browser's per-collection localStorage store. These stores are plaintext, local to each device/origin, independent of Memory, and are not automatically synchronized, encrypted or backed up. Deleting conversation Memory does not delete deliberately saved library entries; delete those separately.
+The sandbox cannot download GitHub artifact blob-storage redirects, so verified binaries are hosted as GitHub Actions artifact archives rather than copied into this local folder. Download while signed into GitHub, extract, then run the EXE. No TLS verification was disabled. Generated runtimes, binaries and build caches are ignored rather than committed.

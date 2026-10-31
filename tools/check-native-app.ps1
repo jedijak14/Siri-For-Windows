@@ -13,7 +13,10 @@ try {
  $wakeCondition=New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty,'WakeStatus')
  $wake=$root.FindFirst([System.Windows.Automation.TreeScope]::Descendants,$wakeCondition)
  if (!$wake -or $wake.Current.Name -notmatch 'Hey Siri is off') { throw 'Wake recognition must be off by default.' }
- Write-Output 'Native WPF EXE launched, composer found, voice activation visibly off. No microphone was enabled.'
+ $second=Start-Process (Join-Path $PSScriptRoot '../native-artifacts/Siri-for-Windows.exe') -PassThru
+ if (!$second.WaitForExit(10000)) { $second.Kill(); throw 'A second launch should activate the first instance and exit.' }
+ if ($second.ExitCode -ne 0) { throw 'Second-instance activation returned an error.' }
+ Write-Output 'Native WPF EXE launched, composer found, voice activation visibly off, second-instance activation passed. No microphone was enabled.'
 } finally {
  if (!$app.HasExited) { [void]$app.CloseMainWindow(); if (!$app.WaitForExit(5000)) { $app.Kill() } }
 }
