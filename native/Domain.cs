@@ -124,3 +124,14 @@ public sealed class TaskPlan
   foreach(var step in Steps){if(step==null||!new[]{"searchInbox","searchHistory","summarize","saveNote","openApp"}.Contains(step.Action))throw new ArgumentException("Unsupported action. No steps were executed.");if(step.Action.StartsWith("search")&&(string.IsNullOrWhiteSpace(step.Query)||step.Query.Length>200))throw new ArgumentException("Search terms must contain 1–200 characters.");if(step.Action=="searchHistory"&&(!new[]{"Chrome","Edge"}.Contains(step.Browser)||!System.Text.RegularExpressions.Regex.IsMatch(step.Profile,"\\A(Default|Profile [0-9]+)\\z")))throw new ArgumentException("Invalid browser or profile.");if(step.Action=="summarize"&&(step.Instruction==null||step.Instruction.Length>1000))throw new ArgumentException("Invalid summary instruction.");if(step.Action=="openApp"&&!new[]{"photos","explorer","settings"}.Contains(step.App))throw new ArgumentException("This app is not in the allowed action list.");}
  }
 }
+
+public sealed class WakeIntent
+{
+ public bool Enabled {get;private set;}
+ private int pauses;
+ public bool ShouldListen=>Enabled&&pauses==0;
+ public void Enable()=>Enabled=true;
+ public void Disable()=>Enabled=false;
+ public void Pause()=>pauses++;
+ public void Resume()=>pauses=Math.Max(0,pauses-1);
+}

@@ -33,7 +33,7 @@ internal static class Tools
  {
   var window=new ToolWindow(app,"Settings & privacy",650,710);var state=app.Store.Data.Settings;
   window.Body.Children.Add(Ui.Label("Native Windows app · No Electron, Chromium, or local web server is used by this executable."));
-  var wake=new CheckBox{Content="Listen for ‘Hey Siri’ while this app is running",IsChecked=app.Speech.Armed};window.Body.Children.Add(wake);window.Body.Children.Add(Ui.Label("Opt-in microphone use. The phrase is recognized locally with an installed English Windows recognizer. No audio is saved. Closing the app stops listening; each launch starts with voice activation off. Windows microphone permissions/policy can block it."));
+  var wake=new CheckBox{Content="Listen for ‘Hey Siri’ while this app is running",IsChecked=app.Speech.Requested};window.Body.Children.Add(wake);window.Body.Children.Add(Ui.Label("Opt-in microphone use. The phrase is recognized locally with an installed English Windows recognizer. No audio is saved. Closing the app stops listening; each launch starts with voice activation off. Windows microphone permissions/policy can block it."));
   var shortcut=new CheckBox{Content="Ctrl + Shift + Space opens separate Writing Tools",IsChecked=app.ShortcutEnabled};window.Body.Children.Add(shortcut);
   var memory=new CheckBox{Content="Save conversations on this device",IsChecked=state.Memory};window.Body.Children.Add(memory);
   var language=Ui.Field(window.Body,"Reply language (auto, English, French, Japanese, Korean, Portuguese, Spanish)",state.Language);
@@ -44,7 +44,7 @@ internal static class Tools
   window.Body.Children.Add(Ui.Button("Delete saved conversation memory",()=>{if(app.Confirm("Delete memory?","Delete saved conversations, but not notes, reminders or meals?")){app.Store.Data.Conversations.Clear();app.Store.Save();app.RefreshConversationList();}}));
   window.Body.Children.Add(Ui.Button("Save settings",()=>{
    var languages=new[]{"auto","English","French","Japanese","Korean","Portuguese","Spanish"};if(!languages.Contains(language.Text.Trim(),StringComparer.OrdinalIgnoreCase))throw new ArgumentException("Choose one of the listed reply languages.");if(!int.TryParse(pace.Text,out var rate)||rate< -5||rate>5)throw new ArgumentException("Speaking pace must be -5 to 5.");
-   if(wake.IsChecked==true&&!app.Speech.Armed){if(!app.Confirm("Enable microphone listening?","While Siri is running, your microphone will listen locally for ‘Hey Siri’. It will not save audio. Closing the app stops it. Enable?"))return;app.Speech.StartWake();}else if(wake.IsChecked!=true)app.Speech.StopWake();app.UpdateWake();
+   if(wake.IsChecked==true&&!app.Speech.Requested){if(!app.Confirm("Enable microphone listening?","While Siri is running, your microphone will listen locally for ‘Hey Siri’. It will not save audio. Closing the app stops it. Enable?"))return;app.Speech.StartWake();}else if(wake.IsChecked!=true)app.Speech.StopWake();app.UpdateWake();
    if(!app.SetWritingShortcut(shortcut.IsChecked==true))throw new InvalidOperationException("The writing shortcut is already in use. Voice settings were applied, but the shortcut was not registered.");
    state.Memory=memory.IsChecked==true;state.Language=language.Text.Trim();state.SpeechRate=rate;state.Voice=voice.SelectedItem is string v&&v!="Default"?v:"";
    // Do not clear an existing choice unless the user explicitly changed a populated selector.

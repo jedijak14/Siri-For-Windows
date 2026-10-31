@@ -42,7 +42,7 @@ public partial class MainWindow : Window
  internal async Task RefreshModels(){try{var models=await Ai.Models();ModelStatus.Text=models.Length==0?"Install a local Ollama model":"Local model ready · "+(Store.Data.Settings.Model.Length>0?Store.Data.Settings.Model:models[0]);}catch{ModelStatus.Text="Local AI not connected · Start Ollama";}}
  internal bool ShortcutEnabled {get;private set;}
  internal void RefreshConversationList(){NewChat(this,new RoutedEventArgs());RefreshHistory();}
- internal void UpdateWake()=>WakeStatus.Text=Speech.Armed?"●  Hey Siri is listening":"○  Hey Siri is off";
+ internal void UpdateWake()=>WakeStatus.Text=Speech.Armed?"●  Hey Siri is listening":Speech.Requested?"◌  Hey Siri paused for speech":"○  Hey Siri is off";
  internal bool Confirm(string title,string text)=>MessageBox.Show(OwnedWindows.Cast<Window>().FirstOrDefault(w=>w.IsActive)??this,text,title,MessageBoxButton.YesNo,MessageBoxImage.Question,MessageBoxResult.No)==MessageBoxResult.Yes;
  internal void Notify(string text)=>Status.Text=text;
  internal void AddSources(IEnumerable<Source> incoming){foreach(var source in incoming){if(Rules.IsExcluded(Store.Data.Settings,source.App))throw new InvalidOperationException(source.App+" is excluded.");if(sources.Count>=12)throw new InvalidOperationException("Use up to twelve text excerpts per request.");sources.Add(new(){App=source.App,Title=source.Title,Text=source.Text[..Math.Min(source.Text.Length,24000)]});}RenderAttachments();Status.Text="Context attached. Review your question, then press Send.";Prompt.Focus();}
