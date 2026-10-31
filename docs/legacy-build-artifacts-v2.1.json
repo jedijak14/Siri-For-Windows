@@ -1,0 +1,24 @@
+{
+  "builtCommit": "c1a6e97e14c52881498e8a1b80d923251dacd377",
+  "run": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213",
+  "status": "success",
+  "artifacts": [
+    {
+      "name": "Siri-for-Windows-exe",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055136661",
+      "archiveBytes": 110546101,
+      "archiveSha256": "31fae7d58b8cec91cb7cca873661ecd2cafac7134cbef60e3d7539c3251c7da0",
+      "description": "ZIP containing the real unsigned x64 Electron portable executable. Requires local Ollama and an installed model."
+    },
+    {
+      "name": "Siri-Android-debug-apk",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055145735",
+      "archiveBytes": 78777,
+      "archiveSha256": "fd1e2642a2bbe39f58883db986050e2f56ab33a9875ff83fbe980cfb71c0dd2d",
+      "description": "ZIP containing an installable Android debug companion APK. Requires a user-trusted HTTPS Siri server; not standalone on-device AI."
+    }
+  ],
+  "localDownload": "Blocked by sandbox networking at GitHub artifact blob-storage redirect; binaries are hosted in GitHub Actions, not in the local repository folder.",
+  "validation": "34 automated tests; Windows PowerShell syntax and native C# helper compilation; successful v2.1 EXE/APK builds; real Chromium desktop/mobile checks for notes persistence, palette navigation, bill totals, writing comparison, cancellation and layout. Native Android hardware and interactive Windows/Office behavior still require device testing.",
+  "version": "2.1.0"
+}

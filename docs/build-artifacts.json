@@ -1,24 +1,36 @@
 {
-  "builtCommit": "c1a6e97e14c52881498e8a1b80d923251dacd377",
-  "run": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213",
+  "version": "3.0.0-native",
+  "builtCommit": "184d2b8e5fa1f280b3e3a970ddf2e1f2e7eeb78e",
+  "run": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961",
   "status": "success",
   "artifacts": [
     {
-      "name": "Siri-for-Windows-exe",
-      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055136661",
-      "archiveBytes": 110546101,
-      "archiveSha256": "31fae7d58b8cec91cb7cca873661ecd2cafac7134cbef60e3d7539c3251c7da0",
-      "description": "ZIP containing the real unsigned x64 Electron portable executable. Requires local Ollama and an installed model."
+      "name": "Siri-for-Windows-Native-exe",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055665774",
+      "archiveBytes": 67754653,
+      "archiveSha256": "fbd51ba63f09812be1a814e431f88adfba314c9c34531c7eb5eb6dadc660bc8e",
+      "description": "ZIP containing Siri-for-Windows.exe: unsigned, native C#/WPF, self-contained .NET 8 x64, single-file. No Electron, Chromium, WebView, Python or Node runtime. Requires Ollama with a local model for AI. Wake requires opt-in and installed English Windows speech recognition; running app only."
     },
     {
       "name": "Siri-Android-debug-apk",
-      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055145735",
-      "archiveBytes": 78777,
-      "archiveSha256": "fd1e2642a2bbe39f58883db986050e2f56ab33a9875ff83fbe980cfb71c0dd2d",
-      "description": "ZIP containing an installable Android debug companion APK. Requires a user-trusted HTTPS Siri server; not standalone on-device AI."
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055317217",
+      "archiveBytes": 78773,
+      "archiveSha256": "638b20cadce268b0e657647c6362fdbe289a10c0b71766570b31f5c11a2c8874",
+      "description": "ZIP containing the separately built Android debug HTTPS companion APK (v2.1). Not a native WPF client or on-device model. Requires separately hosted trusted HTTPS companion web UI; native WPF EXE does not host its backend."
     }
   ],
-  "localDownload": "Blocked by sandbox networking at GitHub artifact blob-storage redirect; binaries are hosted in GitHub Actions, not in the local repository folder.",
-  "validation": "34 automated tests; Windows PowerShell syntax and native C# helper compilation; successful v2.1 EXE/APK builds; real Chromium desktop/mobile checks for notes persistence, palette navigation, bill totals, writing comparison, cancellation and layout. Native Android hardware and interactive Windows/Office behavior still require device testing.",
-  "version": "2.1.0"
+  "validation": [
+    "34 companion/domain tests passed in Windows CI.",
+    "Native domain tests passed: wake intent/revocation, threshold/cooldown, cent arithmetic, payment validation, allowlisted task plans, case-insensitive exclusions, excluded-history filtering, cloud/remote model metadata.",
+    "Actual self-contained native EXE published and verified without required loose DLLs.",
+    "Actual WPF EXE launched in Windows CI; accessible composer found, wake activation visibly off; second launch exited successfully after activation handoff.",
+    "Android APK successfully compiled."
+  ],
+  "limitations": [
+    "Real microphone recognition, accessibility fields, classic Outlook, browser history locks, model inference, screenshots and Android hardware need real-device verification. CI did not enable a microphone or send a real inference request.",
+    "Native feature parity is not complete: legacy tags, word-level writing diffs and Markdown previews are not all ported. Native and legacy stores are separate.",
+    "Native wake listens only after explicit per-session opt-in while the app runs; no closed-app background service.",
+    "GitHub sign-in/extraction and artifact retention apply. SHA-256 values identify artifact ZIP archives, not the inner EXE/APK."
+  ],
+  "localDownload": "Sandbox outbound policy blocks GitHub artifact blob-storage redirects; actual compiled binaries are available at the hosted artifact URLs, not copied into this checkout."
 }

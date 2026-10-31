@@ -83,6 +83,8 @@ See [legacy documentation](docs/legacy-electron.md) for its Office add-in, optio
 
 ## Downloads / current build status
 
-Native code compiled and passed the actual WPF startup/voice-off check in run [41235505516](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41235505516). The final build including native task orchestration, context filtering and single-instance checks is being verified; final artifact links and SHA-256 values are recorded in `docs/build-artifacts.json` once it succeeds.
+**Verified native build:** [Windows native EXE download](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055665774) · [Android companion APK](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055317217) · [successful build and actual WPF launch checks](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961).
+
+Built from commit `184d2b8e5fa1f280b3e3a970ddf2e1f2e7eeb78e`. Windows packaging, native rule checks, the actual WPF launch/voice-off check, second-instance activation, all 34 companion tests, and Android packaging passed. Artifact ZIP sizes and API-reported SHA-256 digests are in [`docs/build-artifacts.json`](docs/build-artifacts.json). The native Windows ZIP is approximately 67.8 MB. Extract it and run `Siri-for-Windows.exe`. It is unsigned; Windows may show a SmartScreen warning. Prior Electron-only artifact records are preserved separately in [`docs/legacy-build-artifacts-v2.1.json`](docs/legacy-build-artifacts-v2.1.json).
 
 The sandbox cannot download GitHub artifact blob-storage redirects, so verified binaries are hosted as GitHub Actions artifact archives rather than copied into this local folder. Download while signed into GitHub, extract, then run the EXE. No TLS verification was disabled. Generated runtimes, binaries and build caches are ignored rather than committed.
