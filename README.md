@@ -6,7 +6,7 @@ This is an independent community project, not an official Apple or Microsoft pro
 
 ## A quieter desktop app
 
-The native window follows the supplied reference's structure: a blue conversation sidebar, a dark main conversation area, a quiet empty state, and a bottom composer. The sidebar contains conversations—not a long feature list. Secondary actions live in **one Tools menu**. Writing assistance opens in a **separate native window**.
+The native window follows the supplied reference's structure: a blue conversation sidebar, a dark main conversation area, a quiet empty state, a bottom composer, and genuinely rounded native window borders (including the tool dialogs and wake bubble). Custom title-bar controls retain dragging, minimizing, maximizing and closing; maximized windows use square edges as on Windows. The sidebar contains conversations—not a long feature list. Secondary actions live in **one Tools menu**. Writing assistance opens in a **separate native window**.
 
 The browser preview was simplified too, but it is a companion/legacy web interface, not the implementation packaged into the primary Windows EXE.
 
@@ -16,11 +16,21 @@ The browser preview was simplified too, but it is a companion/legacy web interfa
 2. Enable **Listen for ‘Hey Siri’ while this app is running**, then confirm microphone use and Save.
 3. Keep the app running, including minimized to the taskbar, and say **Hey Siri**.
 
-The Windows `System.Speech` engine recognizes that exact English phrase locally and asks the UI to restore/activate. A confidence threshold and cooldown reduce accidental triggers. The visible status changes to **Hey Siri is listening**. The microphone is not recorded to a file or sent to Ollama/cloud services by this wake-word listener.
+The Windows `System.Speech` engine recognizes that exact English phrase locally and opens a small, always-on-top **Siri bubble**, without expanding the full conversation window. The bubble captures one following utterance locally and puts the recognized words in its composer. Review them and press **Ask**, or type instead. The bubble can display the local model’s answer and retain a short in-memory follow-up conversation. **Stop** or closing the bubble cancels its current dictation/request; the separately opted-in wake listener can resume. **Open app** hides the bubble and opens the main app. A confidence threshold and cooldown reduce accidental triggers. The visible status changes to **Hey Siri is listening**. The microphone is not recorded to a file or sent to Ollama/cloud services by this wake-word listener.
 
-**Voice activation is off at every launch.** Turning it off or closing the app disposes the recognizer. It does not install a background service, startup entry, or OS-wide assistant replacement, and cannot respond after the app exits. An installed **English Windows speech recognizer**, working microphone, and Windows desktop-microphone permission are required. Accuracy, background noise, hardware and enterprise policy need real-device testing. Automated CI does not verify actual spoken audio. The wake phrase opens the app; following commands are typed or captured through the explicit one-shot dictation button, not silently recorded after every wake.
+**Voice activation is off at every launch.** Turning it off or closing the app disposes the recognizer. It does not install a background service, startup entry, or OS-wide assistant replacement, and cannot respond after the app exits. An installed **English Windows speech recognizer**, working microphone, and Windows desktop-microphone permission are required. Accuracy, background noise, hardware and enterprise policy need real-device testing. Automated CI does not verify actual spoken audio. Enabling wake recognition explicitly consents to both wake-phrase listening and a single, visible follow-up dictation when the bubble appears. It does not automatically send recognized text to the model. A manually opened bubble does not start microphone capture.
 
 A second launch activates the running instance instead of starting a second microphone listener or competing data writer.
+
+## Choose the model
+
+Use **Choose model…** in the sidebar, or the model selectors in **Settings & privacy**. Installed Ollama models load automatically; **Refresh installed models** reloads the list. Select a text model and a separate image/vision model, then Save. The choices persist and apply to main chat, the Siri bubble, writing assistance and reviewed tasks. Choose **Automatic** to let Siri pick. Current choices stay visible if Ollama is offline; models are not downloaded or switched behind your back. Image requests reject models without advertised vision support.
+
+## Siri in Windows Settings
+
+From the published EXE, open **Settings & privacy → Add Siri Settings to Windows Settings** and approve the per-user registration. No administrator rights are required. Windows then lists **Siri for Windows — Settings integration** under **Settings → Apps → Installed apps**. Open its menu and choose **Modify** to launch Siri's settings. Some Windows versions expose Modify only through Control Panel Programs and Features. A `siriforwindows:` URI handler opens the same settings window.
+
+**This is an Apps integration, not a custom page in the main Windows Settings navigation.** Ordinary desktop apps cannot add an arbitrary Siri pane there through a supported public extension API. Keep the EXE at its registered path; moving/renaming it requires registering again. You can remove the listing/link from Siri Settings or its Windows Apps Uninstall action. Removing the integration does **not** delete the portable EXE, your saved data, or Ollama.
 
 ## Features implemented directly in the native EXE
 
@@ -60,7 +70,7 @@ dotnet publish native/SiriNative.csproj -c Release -r win-x64 --self-contained t
 
 The result is `native-artifacts/Siri-for-Windows.exe`. It is unsigned. SmartScreen may warn about unsigned community software; signing is not configured. The primary workflow's artifact is named **Siri-for-Windows-Native-exe**. Older artifacts named `Siri-for-Windows-exe` contain the old Electron build; do not confuse them.
 
-The GitHub Windows job checks native arithmetic/wake/validation rules, publishes the self-contained EXE, verifies there are no required loose DLLs, launches the actual WPF app, finds its composer through accessibility, checks that wake recognition is visibly off, and tests second-instance activation. It never enables the runner's microphone. Real Windows/Office/Outlook/hardware behavior needs device testing.
+The GitHub Windows job checks native arithmetic/wake/validation rules, publishes the self-contained EXE, verifies there are no required loose DLLs, launches the actual WPF app, finds its composer through accessibility, checks that wake recognition is visibly off, tests second-instance activation, checks the rounded native region, opens the bubble without microphone capture, and verifies the actual text/vision selectors in the Settings dialog. It never enables the runner's microphone. Real Windows/Office/Outlook/hardware behavior needs device testing.
 
 ## Android and legacy/browser edition
 
@@ -81,10 +91,14 @@ npm test                        # companion/domain tests
 
 See [legacy documentation](docs/legacy-electron.md) for its Office add-in, optional extension and browser-specific setup. Universal Microsoft-app embedding, unrestricted autonomous control, stock Camera Siri mode, direct private voicemail/messaging attachment stores, photo batch sharing/editing, and actual payment execution remain unimplemented. The native EXE does not acquire these capabilities merely by being native.
 
-## Downloads / current build status
+## Direct downloads / current build status
 
-**Verified native build:** [Windows native EXE download](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055665774) · [Android companion APK](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055317217) · [successful build and actual WPF launch checks](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961).
+**[Download Siri-for-Windows.exe directly — no ZIP](https://github.com/jedijak14/Siri-For-Windows/releases/latest/download/Siri-for-Windows.exe)**
 
-Built from commit `184d2b8e5fa1f280b3e3a970ddf2e1f2e7eeb78e`. Windows packaging, native rule checks, the actual WPF launch/voice-off check, second-instance activation, all 34 companion tests, and Android packaging passed. Artifact ZIP sizes and API-reported SHA-256 digests are in [`docs/build-artifacts.json`](docs/build-artifacts.json). The native Windows ZIP is approximately 67.8 MB. Extract it and run `Siri-for-Windows.exe`. It is unsigned; Windows may show a SmartScreen warning. Prior Electron-only artifact records are preserved separately in [`docs/legacy-build-artifacts-v2.1.json`](docs/legacy-build-artifacts-v2.1.json).
+Close an older running copy of Siri before opening the new EXE, or single-instance activation will bring the old version forward. This is unsigned community software; Windows may show a SmartScreen warning. No installer or separate .NET runtime is required. The downloadable file is a real, self-contained native Windows executable, not a renamed archive or a downloader stub.
 
-The sandbox cannot download GitHub artifact blob-storage redirects, so verified binaries are hosted as GitHub Actions artifact archives rather than copied into this local folder. Download while signed into GitHub, extract, then run the EXE. No TLS verification was disabled. Generated runtimes, binaries and build caches are ignored rather than committed.
+**Verified 3.1 build:** [exact EXE asset](https://github.com/jedijak14/Siri-For-Windows/releases/download/native-v3.1-build20/Siri-for-Windows.exe) · [successful Windows UI/build checks](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41237175652). Built from `d02c3e56722f80a99e57e8ff637424090aba32bc`; actual EXE size 73,190,934 bytes. Binary SHA-256: `2dfe9fb20a69c1dec902c0dc36ec70377486bbc1fafba1508f1050d14c8f4210`.
+
+The release asset is published directly by the Windows build job **after** successful native compile/package and actual UI smoke checks. GitHub Actions still retains optional ZIP archives as CI artifacts, but those are no longer the primary Windows download. Exact versioned release links, file sizes and API-reported binary SHA-256 digests are recorded in [`docs/build-artifacts.json`](docs/build-artifacts.json). Prior artifact records are preserved separately.
+
+The sandbox cannot download binary-storage redirects, so compiled binaries are hosted on GitHub Releases rather than copied into this checkout. The primary Windows link serves the EXE itself, with no extraction step. Private repositories may require GitHub sign-in. No TLS verification was disabled. Generated runtimes, binaries and build caches are ignored rather than committed.

@@ -1,0 +1,36 @@
+{
+  "version": "3.0.0-native",
+  "builtCommit": "184d2b8e5fa1f280b3e3a970ddf2e1f2e7eeb78e",
+  "run": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961",
+  "status": "success",
+  "artifacts": [
+    {
+      "name": "Siri-for-Windows-Native-exe",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055665774",
+      "archiveBytes": 67754653,
+      "archiveSha256": "fbd51ba63f09812be1a814e431f88adfba314c9c34531c7eb5eb6dadc660bc8e",
+      "description": "ZIP containing Siri-for-Windows.exe: unsigned, native C#/WPF, self-contained .NET 8 x64, single-file. No Electron, Chromium, WebView, Python or Node runtime. Requires Ollama with a local model for AI. Wake requires opt-in and installed English Windows speech recognition; running app only."
+    },
+    {
+      "name": "Siri-Android-debug-apk",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055317217",
+      "archiveBytes": 78773,
+      "archiveSha256": "638b20cadce268b0e657647c6362fdbe289a10c0b71766570b31f5c11a2c8874",
+      "description": "ZIP containing the separately built Android debug HTTPS companion APK (v2.1). Not a native WPF client or on-device model. Requires separately hosted trusted HTTPS companion web UI; native WPF EXE does not host its backend."
+    }
+  ],
+  "validation": [
+    "34 companion/domain tests passed in Windows CI.",
+    "Native domain tests passed: wake intent/revocation, threshold/cooldown, cent arithmetic, payment validation, allowlisted task plans, case-insensitive exclusions, excluded-history filtering, cloud/remote model metadata.",
+    "Actual self-contained native EXE published and verified without required loose DLLs.",
+    "Actual WPF EXE launched in Windows CI; accessible composer found, wake activation visibly off; second launch exited successfully after activation handoff.",
+    "Android APK successfully compiled."
+  ],
+  "limitations": [
+    "Real microphone recognition, accessibility fields, classic Outlook, browser history locks, model inference, screenshots and Android hardware need real-device verification. CI did not enable a microphone or send a real inference request.",
+    "Native feature parity is not complete: legacy tags, word-level writing diffs and Markdown previews are not all ported. Native and legacy stores are separate.",
+    "Native wake listens only after explicit per-session opt-in while the app runs; no closed-app background service.",
+    "GitHub sign-in/extraction and artifact retention apply. SHA-256 values identify artifact ZIP archives, not the inner EXE/APK."
+  ],
+  "localDownload": "Sandbox outbound policy blocks GitHub artifact blob-storage redirects; actual compiled binaries are available at the hosted artifact URLs, not copied into this checkout."
+}

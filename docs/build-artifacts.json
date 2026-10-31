@@ -1,30 +1,34 @@
 {
-  "version": "3.0.0-native",
-  "builtCommit": "184d2b8e5fa1f280b3e3a970ddf2e1f2e7eeb78e",
-  "run": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961",
+  "version": "3.1.0-native",
+  "builtCommit": "d02c3e56722f80a99e57e8ff637424090aba32bc",
+  "run": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41237175652",
   "status": "success",
+  "release": "https://github.com/jedijak14/Siri-For-Windows/releases/tag/native-v3.1-build20",
   "artifacts": [
     {
-      "name": "Siri-for-Windows-Native-exe",
-      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055665774",
-      "archiveBytes": 67754653,
-      "archiveSha256": "fbd51ba63f09812be1a814e431f88adfba314c9c34531c7eb5eb6dadc660bc8e",
-      "description": "ZIP containing Siri-for-Windows.exe: unsigned, native C#/WPF, self-contained .NET 8 x64, single-file. No Electron, Chromium, WebView, Python or Node runtime. Requires Ollama with a local model for AI. Wake requires opt-in and installed English Windows speech recognition; running app only."
+      "name": "Siri-for-Windows.exe",
+      "download": "https://github.com/jedijak14/Siri-For-Windows/releases/download/native-v3.1-build20/Siri-for-Windows.exe",
+      "latestDownload": "https://github.com/jedijak14/Siri-For-Windows/releases/latest/download/Siri-for-Windows.exe",
+      "bytes": 73190934,
+      "binarySha256": "2dfe9fb20a69c1dec902c0dc36ec70377486bbc1fafba1508f1050d14c8f4210",
+      "description": "Actual unsigned self-contained native C#/WPF Windows x64 EXE, served directly by GitHub Releases. Not a ZIP, web shell, installer, downloader stub or Electron binary. .NET runtime bundled. Requires local Ollama for inference."
     },
     {
       "name": "Siri-Android-debug-apk",
-      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41236001961/artifacts/13055317217",
-      "archiveBytes": 78773,
-      "archiveSha256": "638b20cadce268b0e657647c6362fdbe289a10c0b71766570b31f5c11a2c8874",
-      "description": "ZIP containing the separately built Android debug HTTPS companion APK (v2.1). Not a native WPF client or on-device model. Requires separately hosted trusted HTTPS companion web UI; native WPF EXE does not host its backend."
+      "download": "https://github.com/jedijak14/Siri-For-Windows/actions/runs/41237175652/artifacts/13056247381",
+      "archiveBytes": 78775,
+      "archiveSha256": "b092cd5a992b2556ebc78e3e608ad2e2b1f4b28c9b327625b1f60074cc2937dd",
+      "description": "Unchanged separate Android HTTPS web companion; optional GitHub Actions ZIP containing its debug APK. The native EXE does not host its backend."
     }
   ],
   "validation": [
-    "34 companion/domain tests passed in Windows CI.",
-    "Native domain tests passed: wake intent/revocation, threshold/cooldown, cent arithmetic, payment validation, allowlisted task plans, case-insensitive exclusions, excluded-history filtering, cloud/remote model metadata.",
-    "Actual self-contained native EXE published and verified without required loose DLLs.",
-    "Actual WPF EXE launched in Windows CI; accessible composer found, wake activation visibly off; second launch exited successfully after activation handoff.",
-    "Android APK successfully compiled."
+    "34 companion tests and native pure-domain checks passed.",
+    "Native self-contained EXE compiled, verified with no loose DLL requirement, and actually launched on Windows CI.",
+    "GetWindowRgn verified genuinely rounded native window borders.",
+    "UI Automation found the main composer and confirmed wake starts off.",
+    "Second launch activated the existing instance; --bubble opened the actual bubble and its composer without microphone capture.",
+    "--settings opened the owned Settings dialog; UI Automation found the text and vision model selectors and closed the dialog.",
+    "After successful UI checks, Windows CI uploaded the actual EXE to GitHub Releases as a directly downloadable asset."
   ],
   "limitations": [
     "Real microphone recognition, accessibility fields, classic Outlook, browser history locks, model inference, screenshots and Android hardware need real-device verification. CI did not enable a microphone or send a real inference request.",
@@ -32,5 +36,7 @@
     "Native wake listens only after explicit per-session opt-in while the app runs; no closed-app background service.",
     "GitHub sign-in/extraction and artifact retention apply. SHA-256 values identify artifact ZIP archives, not the inner EXE/APK."
   ],
-  "localDownload": "Sandbox outbound policy blocks GitHub artifact blob-storage redirects; actual compiled binaries are available at the hosted artifact URLs, not copied into this checkout."
+  "settingsIntegration": "Opt-in HKCU Installed Apps registration with ModifyPath opening --settings and a siriforwindows: protocol. Not an arbitrary page inside Windows Settings navigation. Integration removal leaves EXE/data intact. Actual Windows Settings frontend availability/Modify presentation requires device/version verification.",
+  "wakeBubble": "Explicit per-session wake consent covers local wake phrase plus one follow-up dictation into the bubble for review. Ask sends the text; Stop/Close cancels the active bubble operation. Manual --bubble opens without enabling microphone. Actual spoken audio was not tested in CI.",
+  "localDownload": "Sandbox cannot fetch binary-storage redirect hosts. The compiled EXE is hosted directly on GitHub Releases, not copied into the checkout."
 }
