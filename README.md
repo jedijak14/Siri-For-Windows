@@ -55,7 +55,7 @@ This is scoped, user-approved orchestration, **not unrestricted autonomous contr
 
 - Meal vision prompts provide uncertain, non-medical estimates. A valid structured response `{name,items:[{name,calories,protein,carbs,fat}],uncertainty}` has a **Review & log meal** action. Otherwise enter the estimates manually.
 - The local nutrition journal lets you review foods and macros, updates totals immediately as values change, and supports save/edit/delete. Nothing is saved without a click. Desktop stores `nutrition.json`; preview uses localStorage. Independent from chat Memory; not connected to an external health account.
-- The receipt calculator splits a reviewed subtotal, tax and pre-tax tip with exact-cent remainder distribution. OCR/model extraction must be checked before entering amounts. Equal shares only; not per-diner item assignments.
+- The receipt calculator splits a reviewed subtotal, tax and pre-tax tip with exact-cent remainder distribution. OCR/model extraction must be checked before entering amounts. Equal shares remain available; v2.1 adds a separate item-by-item assignment calculator.
 - Venmo integration validates a username and amount, asks confirmation and opens the official HTTPS payment handoff. You must authenticate and confirm in Venmo. Current client support for the URL parameters and payment status cannot be verified by Siri. **No payment is submitted or confirmed by this app.** Apple Cash has no supported Windows payment integration here.
 
 ## Privacy and native compatibility
@@ -66,7 +66,7 @@ Windows UI Automation, Outlook COM, native insertion and real Office interoperab
 
 ## Android companion
 
-The native Android project uses the supplied logo and connects only after the user confirms a trusted HTTPS Siri server. No insecure JavaScript bridge, certificate bypass or HTTP allowance. The server's responsive interface provides the glass mobile chat/history design. Your phone cannot reach your PC using localhost. This APK is a **server-backed companion**, not bundled on-device AI; native Android screen/camera/file chooser and Windows app controls are not implemented in the WebView. Do not describe it as feature-parity with the Windows app.
+The native Android project uses the supplied logo and connects only after the user confirms a trusted HTTPS Siri server. No insecure JavaScript bridge, certificate bypass or HTTP allowance. The server's responsive interface provides the glass mobile chat/history design. Your phone cannot reach your PC using localhost. This APK is a **server-backed companion**, not bundled on-device AI; v2.1 adds user-selected image/text files and permission-gated camera access in the WebView. Android screen sharing and Windows app controls remain unsupported. Do not describe it as feature-parity with the Windows app.
 
 ## Packaging and validation
 
@@ -88,3 +88,18 @@ Download and extract the archives while signed into GitHub. Artifact URLs expire
 Local validation: **19 passing tests** (pure functions, SQLite snapshot/query handling, plan validation and simulated-DOM interactions), JavaScript/XML syntax checks, no production npm advisories. These are not real native desktop/Office/Android device tests. PowerShell syntax, UI Automation assembly loading, and native C# helper compilation passed in the Windows workflow. Desktop/mobile Chromium smoke checks also passed: separate writing popup, honest offline errors, mobile menu/back navigation, no page errors or horizontal overflow. Legacy Python tests need Tkinter, absent here. Build-time transitive npm advisories remain; review before release.
 
 Local Windows packaging was retried and blocked fetching Electron by certificate/download-network restrictions. Local Android tooling is absent. GitHub runner builds produced actual EXE and APK artifacts; no TLS verification was disabled. Build outputs/caches are ignored and must not be committed. The original Python/Tkinter app remains available as an alternative legacy interface, not the new Electron renderer.
+
+
+## v2.1 — personal tools and reliability
+
+- **Notes:** local create/edit/delete, tags, pinning, all-term search, safe Markdown preview, Markdown export, and explicit attachment as AI context. Attachments use at most the first 40,000 characters. Notes are not automatically indexed or fed to a model.
+- **Saved answers:** Save on any reply, independently of Memory; pin, search, edit, read, export or attach later. Saves question, answer text and model name, not original binary attachments or a complete provenance archive.
+- **Reminders:** local date/time, completion, reopen and one-hour snooze. Due alerts are in-app toasts checked once per minute while the main app window is running. No OS background alarm, email delivery, or alert while the app is closed. No recurring reminders yet.
+- **Itemized splitting:** name diners, assign individual/shared dishes, allocate tax and pre-tax tip proportionally. Integer-cent and BigInt allocation preserves every cent, with deterministic remainder handling. Unassigned dishes, duplicate names and invalid amounts are rejected. No payment is initiated by copying a split.
+- **Command palette:** Ctrl/Cmd+K, searchable actions, arrow-key navigation and Enter activation; mobile still has the Siri menu.
+- **Model controls:** choose installed text/image models, refresh discovery and copy an installation command. No automatic downloads. Missing selections and incompatible image models produce explicit errors rather than silent model substitution.
+- **Stop generation:** cancels in-flight local inference/model discovery, keeps the draft and attachments and does not display cancellation as a model connection failure. Requests are scoped by renderer and ID; cancellation of a completed request does not undo already completed work.
+- **Writing comparison:** the separate Writing Tools panel can compare a revision to the exact draft sent to the model, with inserted/deleted text and character counts. Large comparisons use complete before/after blocks to bound work. This is review assistance, not individual change acceptance or document undo.
+- **Android uploads/camera:** native document picker returns up to three explicitly chosen content-provider files. The camera permission is granted only to the confirmed HTTPS server origin and only for video capture; microphone requests are denied. The WebView has no JavaScript-to-native bridge or TLS bypass. Camera output is still submitted to the configured server only when the user sends a request. Real-device camera/file chooser testing remains necessary.
+
+The native notes/answers/reminders store is a serialized, atomically replaced `library.json` in Electron userData. Each collection is capped at 1,000 entries; note/answer text at 100,000 characters. Validation is shared with the browser's per-collection localStorage store. These stores are plaintext, local to each device/origin, independent of Memory, and are not automatically synchronized, encrypted or backed up. Deleting conversation Memory does not delete deliberately saved library entries; delete those separately.

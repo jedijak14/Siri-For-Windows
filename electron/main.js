@@ -47,6 +47,8 @@ async function openWriting(fromShortcut = false) {
 
 const authorizedSearchRoots = new Set();
 let storedSettings = null;
+let libraryStore;
+const activeRequests = new Map();
 const { relevantMemory } = require("./renderer/domain.js");
 
 function settingsPath() {
@@ -69,6 +71,8 @@ async function readJson(file, fallback) {
 function defaultSettings() {
   return {
     language: "auto",
+    textModel: "",
+    visionModel: "",
     excludedApps: [],
     expressivity: "neutral",
     memoryEnabled: false,
@@ -98,6 +102,7 @@ async function saveSettings(update) {
     ? settings.language : "auto";
   settings.excludedApps = Array.isArray(settings.excludedApps) ? settings.excludedApps.filter(x => typeof x === "string").slice(0, 50) : [];
   settings.expressivity = ["neutral", "calm", "lively"].includes(settings.expressivity) ? settings.expressivity : "neutral";
+  for (const key of ["textModel","visionModel"]) settings[key] = typeof settings[key] === "string" ? settings[key].slice(0,200) : "";
   settings.speechRate = Math.max(-5, Math.min(5, Number(settings.speechRate) || 0));
   settings.speechVolume = Math.max(0, Math.min(100, Number(settings.speechVolume) || 0));
   settings.excludedFolders = Array.isArray(settings.excludedFolders)
@@ -107,8 +112,8 @@ async function saveSettings(update) {
   return structuredClone(settings);
 }
 
-async function listModels() {
-  const response = await fetch(`${OLLAMA}/api/tags`, { signal: AbortSignal.timeout(10000) });
+async function listModels(signal) {
+  const response = await fetch(`${OLLAMA}/api/tags`, { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(10000)]) : AbortSignal.timeout(10000) });
   if (!response.ok) throw new Error(`Ollama returned HTTP ${response.status} while listing models.`);
   const body = await response.json();
   if (!Array.isArray(body.models)) throw new Error("Ollama returned an unexpected model list.");
@@ -117,24 +122,27 @@ async function listModels() {
     .filter((name) => typeof name === "string" && name && !name.toLowerCase().endsWith(":cloud"));
 }
 
-async function modelCapabilities(model) {
+async function modelCapabilities(model, signal) {
   const response = await fetch(`${OLLAMA}/api/show`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model }),
-    signal: AbortSignal.timeout(20000),
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
   });
   if (!response.ok) throw new Error(`Ollama could not inspect model "${model}" (HTTP ${response.status}).`);
   const body = await response.json();
   return Array.isArray(body.capabilities) ? body.capabilities : [];
 }
 
-async function selectModel(vision = false) {
-  const models = await listModels();
+async function selectModel(vision = false, signal) {
+  const models = await listModels(signal);
   if (!models.length) throw new Error("No local Ollama models found. Install a model first.");
+  const settings=await loadSettings();
+  const preferred=vision?settings.visionModel:settings.textModel;
+  if(preferred){if(!models.includes(preferred))throw new Error("Your selected local model is not installed. Choose another model or Automatic in Local models.");if(vision&&!(await modelCapabilities(preferred,signal)).includes("vision"))throw new Error("The selected image model does not advertise vision support.");return preferred;}
   if (vision) {
     for (const model of models) {
-      if ((await modelCapabilities(model)).includes("vision")) return model;
+      if ((await modelCapabilities(model,signal)).includes("vision")) return model;
     }
     throw new Error("No installed local model advertises vision support.");
   }
@@ -180,7 +188,8 @@ async function saveHistory(history) {
   await fs.writeFile(historyPath(), JSON.stringify(history.slice(-MAX_HISTORY), null, 2), "utf8");
 }
 
-async function generate(payload) {
+async function generate(payload, signal) {
+  signal?.throwIfAborted();
   const message = String(payload.message || "").trim();
   if (!message) throw new Error("Enter a question or request first.");
   let images = payload.images || [];
@@ -196,7 +205,7 @@ async function generate(payload) {
   }
   const settings = await loadSettings();
   if (payload.sourceApp && settings.excludedApps.includes(payload.sourceApp)) throw new Error("This app is excluded in Privacy settings.");
-  const model = await selectModel(images.length > 0);
+  const model = await selectModel(images.length > 0,signal);
   let context = "";
   if (settings.memoryEnabled && !payload.noMemory) {
     const history = (await loadHistory()).filter(item => !settings.excludedApps.includes(item.sourceApp));
@@ -207,6 +216,7 @@ async function generate(payload) {
   if ((!settings.memoryEnabled || payload.noMemory) && Array.isArray(payload.history)) {
     context = payload.history.slice(-12).map(item => `${item.role === "assistant" ? "Assistant" : "User"}: ${String(item.text || "").slice(0, 3000)}`).join("\n");
   }
+  signal?.throwIfAborted();
   const system = buildSystemPrompt(settings, payload.mode);
   const prompt = context
     ? `Earlier messages in this Siri for Windows conversation (local app history):\n${context}\n\nCurrent request:\n${message}`
@@ -222,7 +232,7 @@ async function generate(payload) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(300000),
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(300000)]) : AbortSignal.timeout(300000),
   });
   if (!response.ok) {
     const details = (await response.text()).slice(0, 1000);
@@ -230,6 +240,7 @@ async function generate(payload) {
   }
   const result = await response.json();
   if (typeof result.response !== "string") throw new Error("Ollama returned an unexpected response.");
+  signal?.throwIfAborted();
   const answer = result.response.trim();
   const history = await loadHistory();
   const turn = {
@@ -417,6 +428,13 @@ function assertFromApp(event) {
 
 let workflowBusy = false;
 function registerIpc() {
+  const {LibraryStore}=require("./native/library-store");
+  libraryStore = new LibraryStore(path.join(app.getPath("userData"),"library.json"));
+  ipcMain.handle("library:list",(event,kind)=>{assertFromApp(event);return libraryStore.list(kind);});
+  ipcMain.handle("library:save",(event,kind,item)=>{assertFromApp(event);return libraryStore.save(kind,item);});
+  ipcMain.handle("library:remove",(event,kind,id)=>{assertFromApp(event);return libraryStore.remove(kind,id);});
+  ipcMain.handle("assistant:cancel",(event,id)=>{assertFromApp(event);const controller=activeRequests.get(`${event.sender.id}:${id}`);controller?.abort(new Error("Request cancelled."));return !!controller;});
+
   ipcMain.handle("workflow:run", async (event, rawPlan) => {
     assertFromApp(event);
     if(workflowBusy)throw new Error("A task is already running.");
@@ -523,7 +541,11 @@ function registerIpc() {
   });
   ipcMain.handle("assistant:ask", async (event, payload) => {
     assertFromApp(event);
-    return generate(payload || {});
+    const id=typeof payload?.requestId==="string" ? payload.requestId.slice(0,80) : crypto.randomUUID();
+    const key=`${event.sender.id}:${id}`;
+    if(activeRequests.has(key))throw new Error("This request is already running.");
+    const controller=new AbortController();activeRequests.set(key,controller);
+    try{return await generate(payload || {},controller.signal);}finally{activeRequests.delete(key);}
   });
   ipcMain.handle("history:list", async (event) => {
     assertFromApp(event);

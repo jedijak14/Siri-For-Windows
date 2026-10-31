@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#090a0d">
     <title>Siri for Windows</title>
-    <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="reference.css">
+    <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="reference.css"><link rel="stylesheet" href="features.css">
   </head>
   <body>
     <div class="app-shell">
@@ -24,7 +24,7 @@
         <button class="rail-action" data-workspace="search"><span>⌕</span> Device search</button>
         <button class="rail-action" data-workspace="receipt"><span>▤</span> Split a bill</button>
         <button class="rail-action" data-workspace="integrations"><span>▦</span> Connected apps</button>
-        <button class="rail-action" data-workspace="windows"><span>⊞</span> Windows shortcuts</button><button class="rail-action" data-workspace="tasks"><span>⌘</span> Cross-app tasks</button><button class="rail-action" data-workspace="diet"><span>◌</span> Nutrition journal</button><div class="rail-caption">RECENT CONVERSATIONS</div>
+        <button class="rail-action" data-workspace="windows"><span>⊞</span> Windows shortcuts</button><button class="rail-action" data-workspace="tasks"><span>⌘</span> Cross-app tasks</button><button class="rail-action" data-workspace="diet"><span>◌</span> Nutrition journal</button><button class="rail-action" data-workspace="notes"><span>▱</span> Notes</button><button class="rail-action" data-workspace="answers"><span>◇</span> Saved answers</button><button class="rail-action" data-workspace="reminders"><span>◷</span> Reminders</button><button class="rail-action" data-workspace="models"><span>◎</span> Local models</button><div class="rail-caption">RECENT CONVERSATIONS</div>
         <div id="historyList" class="history-list"></div>
         <div class="rail-spacer"></div>
         <div class="privacy-chip"><span class="privacy-dot"></span><span id="modelStatus">Checking local model…</span></div>
@@ -95,7 +95,7 @@
               </div>
               <div class="composer-bottom-right">
                 <button id="listenButton" class="round-tool" title="Dictate using Windows speech">♩</button>
-                <button id="sendButton" class="send-button" aria-label="Send message">↑</button>
+                <button id="stopButton" class="button subtle" hidden>Stop</button><button id="sendButton" class="send-button" aria-label="Send message">↑</button>
               </div>
             </div>
           </div>
@@ -104,7 +104,7 @@
       </main>
     </div>
 
-    <dialog id="quickMenu" class="quick-menu"><header><h2>Siri</h2><button id="closeQuickMenu" class="icon-button" aria-label="Close menu">×</button></header><button id="menuHome">Conversations</button><button id="menuNew">New conversation</button><button data-quick="diet">Nutrition journal</button><button data-quick="receipt">Split a bill</button><button data-quick="visual">Visual intelligence</button><button id="menuWriting">Writing Tools ↗</button><button id="menuSettings">Settings &amp; privacy</button></dialog>
+    <dialog id="quickMenu" class="quick-menu"><header><h2>Siri</h2><button id="closeQuickMenu" class="icon-button" aria-label="Close menu">×</button></header><button id="menuHome">Conversations</button><button id="menuNew">New conversation</button><button data-quick="notes">Notes</button><button data-quick="answers">Saved answers</button><button data-quick="reminders">Reminders</button><button data-quick="models">Local models</button><button data-quick="diet">Nutrition journal</button><button data-quick="receipt">Split a bill</button><button data-quick="visual">Visual intelligence</button><button id="menuWriting">Writing Tools ↗</button><button id="menuSettings">Settings &amp; privacy</button></dialog>
     <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,.txt,.md,.csv,.eml,.json,.log" multiple hidden>
     <div id="toast" class="toast" role="status"></div>
 
@@ -146,6 +146,6 @@
     </dialog>
 
     <dialog id="detailDialog" class="detail-dialog"><article><header><span id="detailMeta"></span><button id="closeDetail" class="icon-button">×</button></header><h2 id="detailQuestion"></h2><div id="detailAnswer" class="detail-answer"></div><footer><button id="copyDetail" class="button subtle">Copy answer</button><button id="openDetail" class="button subtle">Open in conversation</button></footer></article></dialog>
-    <script src="domain.js"></script><script src="web-bridge.js"></script><script src="app.js"></script>
+    <script src="library.js"></script><script src="domain.js"></script><script src="web-bridge.js"></script><script src="app.js"></script><script src="features.js"></script>
   </body>
 </html>

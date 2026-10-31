@@ -1,6 +1,10 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("siri", Object.freeze({
+  listLibrary: (kind) => ipcRenderer.invoke("library:list",kind),
+  saveLibrary: (kind,item) => ipcRenderer.invoke("library:save",kind,item),
+  removeLibrary: (kind,id) => ipcRenderer.invoke("library:remove",kind,id),
+  cancelRequest: (id) => ipcRenderer.invoke("assistant:cancel",id),
   runWorkflow: (plan) => ipcRenderer.invoke("workflow:run",plan),
   openWriting: () => ipcRenderer.invoke("writing:open"),
   writingContext: () => ipcRenderer.invoke("writing:context"),
