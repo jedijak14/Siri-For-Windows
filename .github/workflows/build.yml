@@ -20,11 +20,22 @@ jobs:
       - name: Validate native PowerShell syntax
         shell: powershell
         run: ./tools/check-native.ps1
-      - run: npm run build:win
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Native domain checks
+        run: dotnet run --project native/tests/NativeChecks.csproj --configuration Release
+      - name: Publish self-contained native Windows executable
+        run: dotnet publish native/SiriNative.csproj --configuration Release --runtime win-x64 --self-contained true --output native-artifacts
+      - name: Verify single-file package
+        shell: pwsh
+        run: |
+          if (!(Test-Path native-artifacts/Siri-for-Windows.exe)) { throw 'Missing native EXE' }
+          if (Get-ChildItem native-artifacts -Filter *.dll) { throw 'Expected bundled libraries, found external DLLs' }
       - uses: actions/upload-artifact@v4
         with:
-          name: Siri-for-Windows-exe
-          path: dist/*.exe
+          name: Siri-for-Windows-Native-exe
+          path: native-artifacts/*.exe
           if-no-files-found: error
   android:
     runs-on: ubuntu-24.04
