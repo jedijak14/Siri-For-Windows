@@ -323,7 +323,9 @@ async function searchFolder(folder, query) {
 
 function runPowerShell(script, input = "", timeout = 30000) {
   return new Promise((resolve, reject) => {
-    const child = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+    const prelude = "[Console]::InputEncoding = New-Object System.Text.UTF8Encoding($false); [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); ";
+    const encoded = Buffer.from(prelude + script, "utf16le").toString("base64");
+    const child = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-EncodedCommand", encoded], {
       windowsHide: true,
       stdio: ["pipe", "pipe", "pipe"],
     });
