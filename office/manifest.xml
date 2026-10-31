@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="TaskPaneApp">
+ <Id>3364a8ce-7ab7-40af-8132-7b05f30a041a</Id>
+ <Version>2.0.0.0</Version>
+ <ProviderName>Siri for Windows community project</ProviderName>
+ <DefaultLocale>en-US</DefaultLocale>
+ <DisplayName DefaultValue="Siri Writing Assistance"/>
+ <Description DefaultValue="Local-first writing assistance for Word, Excel and PowerPoint. Requires a trusted companion server."/>
+ <Hosts><Host Name="Document"/><Host Name="Workbook"/><Host Name="Presentation"/></Hosts>
+ <DefaultSettings><SourceLocation DefaultValue="https://localhost:3000/office/taskpane.html"/></DefaultSettings>
+ <Permissions>ReadWriteDocument</Permissions>
+</OfficeApp>

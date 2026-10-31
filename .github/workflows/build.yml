@@ -1,0 +1,45 @@
+name: Test and package Siri
+on:
+  workflow_dispatch:
+  push:
+    branches: ['arena/0c07e6cf-siri-for-windows']
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Validate native PowerShell syntax
+        shell: powershell
+        run: ./tools/check-native.ps1
+      - run: npm run build:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Siri-for-Windows-exe
+          path: dist/*.exe
+          if-no-files-found: error
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - run: gradle -p android assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Siri-Android-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

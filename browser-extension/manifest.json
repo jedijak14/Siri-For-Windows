@@ -1,0 +1,11 @@
+{
+ "manifest_version":3,
+ "name":"Siri for Windows · Browser Companion",
+ "version":"2.0.0",
+ "description":"Share a selected page or screenshot with a local Ollama model, only on request.",
+ "permissions":["activeTab","scripting","storage"],
+ "host_permissions":["http://localhost:11434/*"],
+ "action":{"default_popup":"popup.html","default_title":"Ask Siri about this page"},
+ "background":{"service_worker":"worker.js"},
+ "content_security_policy":{"extension_pages":"script-src 'self'; object-src 'none'"}
+}
