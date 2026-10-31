@@ -78,14 +78,14 @@ npm run build:android        # JDK 17, Android SDK 35, Gradle 8.9 required
 
 Windows outputs go to `dist/`; Android debug APK to `android/app/build/outputs/apk/debug/app-debug.apk`. Windows binaries are unsigned; debug APKs use the Android development key. Release signing requires a separate process.
 
-`.github/workflows/build.yml` builds on Windows and Android-capable runners and uploads artifact archives. Both jobs completed successfully for commit `0c94c796bd70a207c7deeb6a8780fc1eb0cb2752` in [build run 41232146663](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41232146663).
+`.github/workflows/build.yml` builds on Windows and Android-capable runners and uploads artifact archives. Both jobs completed successfully for commit `c1a6e97e14c52881498e8a1b80d923251dacd377` in [build run 41234038213](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213).
 
-- [Windows Electron portable EXE archive](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41232146663/artifacts/13053863953)
-- [Android debug companion APK archive](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41232146663/artifacts/13054440385)
+- [Windows Electron portable EXE archive](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055136661)
+- [Android debug companion APK archive](https://github.com/jedijak14/Siri-For-Windows/actions/runs/41234038213/artifacts/13055145735)
 
 Download and extract the archives while signed into GitHub. Artifact URLs expire under the repository retention policy. Archive SHA-256 digests and sizes are recorded in `docs/build-artifacts.json`. The sandbox blocks GitHub's blob-storage download redirects, so these binaries are hosted on GitHub rather than copied into the local repository folder. Manual dispatch returned HTTP 403; push-triggered builds worked.
 
-Local validation: **19 passing tests** (pure functions, SQLite snapshot/query handling, plan validation and simulated-DOM interactions), JavaScript/XML syntax checks, no production npm advisories. These are not real native desktop/Office/Android device tests. PowerShell syntax, UI Automation assembly loading, and native C# helper compilation passed in the Windows workflow. Desktop/mobile Chromium smoke checks also passed: separate writing popup, honest offline errors, mobile menu/back navigation, no page errors or horizontal overflow. Legacy Python tests need Tkinter, absent here. Build-time transitive npm advisories remain; review before release.
+Local validation: **34 passing tests** (pure functions, SQLite snapshot/query handling, plan validation and simulated-DOM interactions), JavaScript/XML syntax checks, no production npm advisories. These are not real native desktop/Office/Android device tests. PowerShell syntax, UI Automation assembly loading, and native C# helper compilation passed in the Windows workflow. Desktop/mobile Chromium smoke checks also passed: separate writing popup, honest offline errors, mobile menu/back navigation, no page errors or horizontal overflow. Legacy Python tests need Tkinter, absent here. Build-time transitive npm advisories remain; review before release.
 
 Local Windows packaging was retried and blocked fetching Electron by certificate/download-network restrictions. Local Android tooling is absent. GitHub runner builds produced actual EXE and APK artifacts; no TLS verification was disabled. Build outputs/caches are ignored and must not be committed. The original Python/Tkinter app remains available as an alternative legacy interface, not the new Electron renderer.
 
@@ -94,7 +94,7 @@ Local Windows packaging was retried and blocked fetching Electron by certificate
 
 - **Notes:** local create/edit/delete, tags, pinning, all-term search, safe Markdown preview, Markdown export, and explicit attachment as AI context. Attachments use at most the first 40,000 characters. Notes are not automatically indexed or fed to a model.
 - **Saved answers:** Save on any reply, independently of Memory; pin, search, edit, read, export or attach later. Saves question, answer text and model name, not original binary attachments or a complete provenance archive.
-- **Reminders:** local date/time, completion, reopen and one-hour snooze. Due alerts are in-app toasts checked once per minute while the main app window is running. No OS background alarm, email delivery, or alert while the app is closed. No recurring reminders yet.
+- **Reminders:** local date/time, completion, reopen and one-hour snooze. Due alerts are best-effort in-app toasts checked once per minute while the main app window is running; OS/browser suspension can delay them. No OS background alarm, email delivery, or alert while the app is closed. No recurring reminders yet.
 - **Itemized splitting:** name diners, assign individual/shared dishes, allocate tax and pre-tax tip proportionally. Integer-cent and BigInt allocation preserves every cent, with deterministic remainder handling. Unassigned dishes, duplicate names and invalid amounts are rejected. No payment is initiated by copying a split.
 - **Command palette:** Ctrl/Cmd+K, searchable actions, arrow-key navigation and Enter activation; mobile still has the Siri menu.
 - **Model controls:** choose installed text/image models, refresh discovery and copy an installation command. No automatic downloads. Missing selections and incompatible image models produce explicit errors rather than silent model substitution.
