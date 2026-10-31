@@ -2,7 +2,7 @@
 
 The primary Windows app is now a **native C# / WPF executable**, not Electron, Chromium, a WebView, Python, or a browser window. It is published as one self-contained x64 `.exe`, with the .NET runtime bundled. No Node.js, Electron or separately installed .NET runtime is needed to run it. Some bundled native libraries are extracted to the normal .NET single-file cache at launch; it is not an installer or a web shell.
 
-This is an independent community project, not an official Apple or Microsoft product. Local AI still requires a running **Ollama** installation and an installed model; model weights are not bundled into the executable.
+This is an independent community project, not an official Apple or Microsoft product. Local AI still requires a running **Ollama** installation and an installed model; model weights are not bundled into the executable. Cloud-tagged models are hidden, and selected-model metadata is checked for remote/cloud configuration before any prompt is sent.
 
 ## A quieter desktop app
 
@@ -71,7 +71,8 @@ The prior Electron/web edition is retained for compatibility and the browser pre
 ```sh
 npm ci
 npm run dev                     # browser companion preview
-npm start                       # legacy Electron, NOT the native app
+npm start                       # primary native app (.NET SDK required)
+npm run start:electron:legacy    # optional legacy Electron app
 npm run build:electron:legacy    # explicitly optional legacy packaging
 npm run start:native             # .NET SDK required
 npm run build:win                # now publishes the native .NET EXE

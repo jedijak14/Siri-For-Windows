@@ -5,14 +5,15 @@
   "description": "A local-first Windows AI assistant powered by Ollama",
   "main": "electron/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "dotnet run --project native/SiriNative.csproj",
     "test": "node --test tests/*.test.js",
     "build:win": "dotnet publish native/SiriNative.csproj -c Release -r win-x64 --self-contained true -o native-artifacts",
     "build:win:installer": "electron-builder --win nsis",
     "dev": "node tools/preview.js",
     "build:android": "cd android && gradle assembleDebug",
     "build:electron:legacy": "electron-builder --win portable",
-    "start:native": "dotnet run --project native/SiriNative.csproj"
+    "start:native": "dotnet run --project native/SiriNative.csproj",
+    "start:electron:legacy": "electron ."
   },
   "devDependencies": {
     "electron": "^45.2.1",

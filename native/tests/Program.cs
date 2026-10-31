@@ -30,4 +30,7 @@ Reject(()=>new TaskPlan{Steps=new(){new(){Action="payment"}}}.Validate(),"no pay
 Reject(()=>new TaskPlan{Steps=new(){new(){Action="searchHistory",Query="trip",Browser="Chrome",Profile="../../private"}}}.Validate(),"no arbitrary profile traversal");
 Reject(()=>new TaskPlan{Steps=Enumerable.Range(0,7).Select(_=>new TaskStep{Action="saveNote"}).ToList()}.Validate(),"bounded task length");
 Check(Rules.AllowedHistory(new(){ExcludedApps=new(){"outlook"}},new[]{new Turn{Sources=new(){new(){App="Outlook"}}},new Turn{Answer="plain"}}).Count()==1,"excluded sources are removed from follow-up context");
+Check(Rules.CloudName("model:cloud")&&Rules.CloudName("model:120b-cloud"),"cloud-tagged models are not listed as local");
+using(var remote=System.Text.Json.JsonDocument.Parse("{\"remote_host\":\"https://example.test\",\"remote_model\":\"model\"}"))Check(Rules.RemoteModel(remote.RootElement),"remote model aliases rejected before prompts");
+using(var local=System.Text.Json.JsonDocument.Parse("{\"capabilities\":[\"completion\"]}"))Check(!Rules.RemoteModel(local.RootElement),"local model metadata accepted");
 Console.WriteLine($"{checks} native domain checks passed. Microphone, accessibility, and real app interaction still require device testing.");
