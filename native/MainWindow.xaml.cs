@@ -30,7 +30,7 @@ public partial class MainWindow : Window
  [System.Runtime.InteropServices.DllImport("user32.dll")]private static extern bool UnregisterHotKey(nint handle,int id);
  public MainWindow()
  {
-  InitializeComponent();RefreshHistory();Speech.Woke+=()=>Dispatcher.BeginInvoke(new Action(()=>{if(!Speech.Armed)return;Show();WindowState=WindowState.Normal;Activate();Prompt.Focus();Status.Text="Listening phrase detected. Type a request, or click dictation.";}));Speech.Failed+=error=>Dispatcher.BeginInvoke(new Action(()=>{Speech.StopWake();UpdateWake();Status.Text="Voice activation stopped: "+error;}));
+  InitializeComponent();RefreshHistory();Speech.StateChanged+=()=>Dispatcher.BeginInvoke(new Action(UpdateWake));Speech.Woke+=()=>Dispatcher.BeginInvoke(new Action(()=>{if(!Speech.Armed)return;Show();WindowState=WindowState.Normal;Activate();Prompt.Focus();Status.Text="Listening phrase detected. Type a request, or click dictation.";}));Speech.Failed+=error=>Dispatcher.BeginInvoke(new Action(()=>{Speech.StopWake();UpdateWake();Status.Text="Voice activation stopped: "+error;}));
   Loaded+=async(_,_)=>{if(Store.LoadError!=null)MessageBox.Show(this,Store.LoadError,"Saved data");await RefreshModels();};
   SourceInitialized+=(_,_)=>{hwndSource=HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);hwndSource?.AddHook(WindowMessage);};
   Closed+=(_,_)=>{request?.Cancel();reminders.Stop();Speech.Dispose();if(hwndSource!=null){UnregisterHotKey(hwndSource.Handle,HotkeyId);hwndSource.RemoveHook(WindowMessage);}try{Store.Save();}catch{}};
